@@ -1,0 +1,3 @@
+new hook: $GLOBALS['TYPO3_CONF_VARS']['SC_OPTIONS']['staticpub/class.tx_staticpub.php']['createFile_processContent']
+
+new option - addComment 
