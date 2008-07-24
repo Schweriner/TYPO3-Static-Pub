@@ -1,5 +1,5 @@
 #
-# Table structure for table 'tx_realurl_pathcache'
+# Table structure for table 'tx_staticpub_pages'
 #
 CREATE TABLE tx_staticpub_pages (
   filepath_hash int(11) DEFAULT '0' NOT NULL,

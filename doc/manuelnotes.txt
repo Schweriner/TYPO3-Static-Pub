@@ -1,3 +1,10 @@
 new hook: $GLOBALS['TYPO3_CONF_VARS']['SC_OPTIONS']['staticpub/class.tx_staticpub.php']['createFile_processContent']
 
-new option - addComment 
+new options:
+
+addComment :
+...procInstrParams.tx_staticpub_publish.addComment=1
+
+CHANGE PUBLISHDIR:
+tx_staticpub.publishDir<congstar.staticpub.mainpages
+
