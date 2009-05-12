@@ -123,6 +123,7 @@ class tx_staticpub_fe extends tx_staticpub {
 							if (!strcmp($fI['fileext'],'') || t3lib_div::inList('html,htm',$fI['fileext']))	{
 								if ($res = $this->createStaticFile($fI['path'], $fI['file'], $pObj->content, $pubDir, $origId, $pObj->applicationData['tx_crawler']['parameters']['procInstrParams']['tx_staticpub_publish.']))	{
 									$pObj->applicationData['tx_crawler']['log']['tx_staticpub'] = 'EXT:static_pub; OK: "'.$siteScript.'" published in "'.substr($pubDir,strlen(PATH_site)).'". Msg: '.$res;
+									$pObj->applicationData['tx_crawler']['log']['tx_staticpub']['success'] = true;
 								} else $pObj->applicationData['tx_crawler']['log']['tx_staticpub'] = 'ERROR: '.$this->errorMsg;
 							} else $pObj->applicationData['tx_crawler']['log']['tx_staticpub'] = 'EXT:static_pub; ERROR: Filepath was not an HTML file or directory ("'.$siteScript.'").';
 						} else $pObj->applicationData['tx_crawler']['log']['tx_staticpub'] = 'EXT:static_pub; ERROR: A query string was found in the constructed filepath ("'.$siteScript.'"). This automatically disables publishing!';
@@ -130,7 +131,6 @@ class tx_staticpub_fe extends tx_staticpub {
 				} else $pObj->applicationData['tx_crawler']['log']['tx_staticpub'] = 'EXT:static_pub; ERROR: No publishing directory was configured.';
 			} else $pObj->applicationData['tx_crawler']['log']['tx_staticpub'] = 'EXT:static_pub; ERROR: isStaticCacheble = NO';
 		}
-
 		$GLOBALS['TT']->pull();
 	}
 }
