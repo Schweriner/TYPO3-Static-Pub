@@ -77,16 +77,43 @@ class tx_staticpub {
 	/**
 	 * Return directory for static publishing
 	 *
-	 * @return	string		Returns publishing directory relative to the path site (if any)
+	 * @return	string|null		Returns publishing directory relative to the path site (if any)
 	 */
 	function getPublishDir()	{
-		$pageTSconfig = t3lib_BEfunc::getPagesTSconfig($GLOBALS['TSFE']->id);
-		$pubDir = (isset($pageTSconfig['tx_staticpub.']['publishDir']))?$pageTSconfig['tx_staticpub.']['publishDir']:$GLOBALS['TYPO3_CONF_VARS']['EXTCONF']['staticpub']['publishDir'];
-		
-		if ($pubDir)	{
+
+		$currentPageId = $GLOBALS['TSFE']->id;
+
+		// hook
+		if (isset($GLOBALS['TYPO3_CONF_VARS']['SC_OPTIONS']['staticpub/class.tx_staticpub.php']['getPublishDir'])) {
+			$params = array(
+				'currentPageId' => $currentPageId,
+			);
+			$pubDir = t3lib_div::callUserFunction(
+				$GLOBALS['TYPO3_CONF_VARS']['SC_OPTIONS']['staticpub/class.tx_staticpub.php']['getPublishDir'],
+				$params,
+				$this
+			);
+		}
+
+		// retrieve from page tsconfig
+		if (empty($pubDir)) {
+			$pageTSconfig = t3lib_BEfunc::getPagesTSconfig($currentPageId);
+			if (isset($pageTSconfig['tx_staticpub.']['publishDir'])) {
+				$pubDir = $pageTSconfig['tx_staticpub.']['publishDir'];
+			}
+		}
+
+		// retrieve from TYPO3_CONF_VARS
+		if (empty($pubDir)) {
+			$pubDir = $GLOBALS['TYPO3_CONF_VARS']['EXTCONF']['staticpub']['publishDir'];
+		}
+
+		if (!empty($pubDir)) {
 			$pubDirAbs = t3lib_div::getFileAbsFileName($pubDir);
-			if (substr($pubDirAbs,-1)!='/')	$pubDirAbs.='/';
-			if (@is_dir($pubDirAbs))	{
+			if (substr($pubDirAbs,-1)!='/')	{
+				$pubDirAbs.='/';
+			}
+			if (@is_dir($pubDirAbs)) {
 				return $pubDirAbs;
 			}
 		}
@@ -167,19 +194,19 @@ class tx_staticpub {
 							}
 						}
 					}
-					
+
 						// Check links;
 						// A: Resource is a directory, add default script name "index.html":
-						// B: If 
+						// B: If
 					$noPrefix=FALSE;
 					if ($options['checkLinks'])	{
 						if (ereg('<a[^<>]+$',$parts[$k-1]))	{
-							
+
 								// Set full name for links to directories:
 							if (substr($parts[$k],-1)=="/")	{
 								$parts[$k].='index.html';
 							}
-						
+
 								// Set JavaScript notice when no file found:
 							if (!@is_file($pubDir.$parts[$k]))	{
 								$parts[$k] = "javascript:alert('Sorry, this link is disabled in the offline version');return false;";
@@ -199,7 +226,7 @@ class tx_staticpub {
 			// Update if source has changed:
 		if ($options['includeResources']==='relPath' || $options['checkLinks'])	{
 			$content = implode('',$parts);
-			
+
 		}
 	    if ($options['addComment']) {
 				$content.='<!-- sp - '.date(r).'--->';;
@@ -224,7 +251,7 @@ class tx_staticpub {
 	 */
 	function createFile($path,$file,$content,$pubDir,$page_id,$isResource=FALSE)	{
 		$this->errorMsg = '';
-		
+
 			// If there is a path prefix then create the path if not created already...:
 		if (!@is_dir($pubDir.$path) && strcmp($path,'') && $path!='/')	{
 			$this->errorMsg = $this->createPath($path,$pubDir);
@@ -238,7 +265,7 @@ class tx_staticpub {
 
 				// Set filename to "index.html" if not given (assumed default filename of webserver)
 			$fN = $file ? $file : 'index.html';
-			
+
 			$hookObjectsArr = array();
 			if (is_array ($GLOBALS['TYPO3_CONF_VARS']['SC_OPTIONS']['staticpub/class.tx_staticpub.php']['createFile_processContent'])) {
 				reset($GLOBALS['TYPO3_CONF_VARS']['SC_OPTIONS']['staticpub/class.tx_staticpub.php']['createFile_processContent']);
@@ -282,7 +309,7 @@ class tx_staticpub {
 		//remove leading slash from path
 		if ($path{0}=='/')
 			$path=substr($path,1);
-		
+
 		if (substr($path,-1)=='/')	{
 			$pathParts = explode('/',substr($path,0,-1));
 			foreach($pathParts as $c => $partOfPath)	{
