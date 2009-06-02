@@ -277,8 +277,13 @@ class tx_staticpub {
 				// Ask for existing record:
 			$existRec = $this->getRecordForFile($path.$fN);
 			if (is_array($existRec))	{
-					// Overwrite file:
-				t3lib_div::writeFile($pubDir.$path.$fN, $content);
+
+				if (md5_file($pubDir.$path.$fN) != md5($content)) {
+					// Overwrite file if it has changedcd .:
+					t3lib_div::writeFile($pubDir.$path.$fN, $content);
+				} else {
+					if (TYPO3_DLOG) t3lib_div::devLog(sprintf('File "%s" has not changed', $path.$fN), 'staticpuc', 0);
+				}
 
 					// Create record for published file:
 				$this->createRecordForFile($path.$fN, $isResource?0:$page_id, TRUE);
