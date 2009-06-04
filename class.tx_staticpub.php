@@ -266,11 +266,10 @@ class tx_staticpub {
 				// Set filename to "index.html" if not given (assumed default filename of webserver)
 			$fN = $file ? $file : 'index.html';
 
-			$hookObjectsArr = array();
 			if (is_array ($GLOBALS['TYPO3_CONF_VARS']['SC_OPTIONS']['staticpub/class.tx_staticpub.php']['createFile_processContent'])) {
 				reset($GLOBALS['TYPO3_CONF_VARS']['SC_OPTIONS']['staticpub/class.tx_staticpub.php']['createFile_processContent']);
 				foreach ($GLOBALS['TYPO3_CONF_VARS']['SC_OPTIONS']['staticpub/class.tx_staticpub.php']['createFile_processContent'] as $classRef) {
-					$userObj = &t3lib_div::getUserObj ($classRef);
+					$userObj = &t3lib_div::getUserObj($classRef);
 					$content = $userObj->createFile_processContent($path,$file,$content,$pubDir,$page_id,$isResource);
 				}
 			}
