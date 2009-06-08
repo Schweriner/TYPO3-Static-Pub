@@ -58,6 +58,11 @@ require_once(t3lib_extMgm::extPath('staticpub').'class.tx_staticpub.php');
 class tx_staticpub_modfunc1 extends t3lib_extobjbase {
 
 	/**
+	 * @var tx_staticpub
+	 */
+	var $pubObj;
+
+	/**
 	 * Returns the menu array
 	 *
 	 * @return	array

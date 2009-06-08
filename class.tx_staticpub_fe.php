@@ -86,9 +86,10 @@ class tx_staticpub_fe extends tx_staticpub {
 	 * @param	integer		[Not used here]
 	 * @return	void
 	 */
-	function insertPageIncache(&$pObj,$timeOutTime)	{
+	function insertPageIncache(tslib_fe $pObj,$timeOutTime)	{
 
 		$GLOBALS['TT']->push('tx_staticpub','');
+
 
 			// Look for "crawler" extension activity:
 			// Requirements are that the crawler is loaded, a crawler session is running and re-indexing requested as processing instruction:
@@ -96,42 +97,84 @@ class tx_staticpub_fe extends tx_staticpub {
 				&& $pObj->applicationData['tx_crawler']['running']
 				&& in_array('tx_staticpub_publish', $pObj->applicationData['tx_crawler']['parameters']['procInstructions']))	{
 
+			$fileCreated = false;
+
+			$pubDir = $this->getPublishDir();
+			$origId = intval(t3lib_div::_GET('id'));
+			$siteScript = $this->createUrl($pObj);
+			$uParts = parse_url($siteScript);
+			$fI = t3lib_div::split_fileref($uParts['path']);
+
 				// If the page can be staticly published (same evaluation as if cache-control headers would be sent to a reverse-proxy)
 			if ($pObj->isStaticCacheble())	{
 
 					// Check for Publishing Directory:
-				if ($pubDir = $this->getPublishDir())	{
+				if ($pubDir) {
 
-						// Create URL for this page:
-						// Prepare extra GET vars in addition to id, type etc:
-					$getVars = t3lib_div::_GET();
-					$origId = intval($getVars['id']);
-					$origType = intval($getVars['type']);
-					unset($getVars['id']);
-					unset($getVars['type']);
-
-						// Create URL with link-function (should be the same as a script in the frontend would make to link to this script):
-					$urlData = $pObj->tmpl->linkData($pObj->sys_page->getPage($origId),'',FALSE,'','',t3lib_div::implodeArrayForUrl('',$getVars),$origType);
-					$siteScript = $urlData['totalURL'];
-
+						// Get positive confirmation that either "simulateStaticDocument" or "realurl" was processed right!
 					if ($origId === $pObj->id)	{
-							// Get positive confirmation that either "simulateStaticDocument" or "realurl" was processed right!
-						$uParts = parse_url($siteScript);
-						if (!strcmp($uParts['query'],''))	{
-							$fI = t3lib_div::split_fileref($uParts['path']);
 
+							// check if the query if not empty
+						if (!strcmp($uParts['query'],''))	{
+
+								// check if the file extension is empty, "html" or "htm"
 							if (!strcmp($fI['fileext'],'') || t3lib_div::inList('html,htm',$fI['fileext']))	{
-								if ($res = $this->createStaticFile($fI['path'], $fI['file'], $pObj->content, $pubDir, $origId, $pObj->applicationData['tx_crawler']['parameters']['procInstrParams']['tx_staticpub_publish.']))	{
+
+									// create file
+								$res = $this->createStaticFile($fI['path'], $fI['file'], $pObj->content, $pubDir, $origId, $pObj->applicationData['tx_crawler']['parameters']['procInstrParams']['tx_staticpub_publish.']);
+
+									// check if the file has been created successfully
+								if ($res) {
 									$pObj->applicationData['tx_crawler']['log']['tx_staticpub'] = 'EXT:static_pub; OK: "'.$siteScript.'" published in "'.substr($pubDir,strlen(PATH_site)).'". Msg: '.$res;
-									$pObj->applicationData['tx_crawler']['log']['tx_staticpub']['success'] = true;
-								} else $pObj->applicationData['tx_crawler']['log']['tx_staticpub'] = 'ERROR: '.$this->errorMsg;
+									$pObj->applicationData['tx_crawler']['success']['tx_staticpub'] = true;
+									$fileCreated = true;
+								} else $pObj->applicationData['tx_crawler']['log']['tx_staticpub'] = 'EXT:static_pub; ERROR: '.$this->errorMsg;
 							} else $pObj->applicationData['tx_crawler']['log']['tx_staticpub'] = 'EXT:static_pub; ERROR: Filepath was not an HTML file or directory ("'.$siteScript.'").';
 						} else $pObj->applicationData['tx_crawler']['log']['tx_staticpub'] = 'EXT:static_pub; ERROR: A query string was found in the constructed filepath ("'.$siteScript.'"). This automatically disables publishing!';
 					} else $pObj->applicationData['tx_crawler']['log']['tx_staticpub'] = 'EXT:static_pub; ERROR: GET var ID ("'.$origId.'") did not match TSFE->id ("'.$pObj->id.'")!';
 				} else $pObj->applicationData['tx_crawler']['log']['tx_staticpub'] = 'EXT:static_pub; ERROR: No publishing directory was configured.';
 			} else $pObj->applicationData['tx_crawler']['log']['tx_staticpub'] = 'EXT:static_pub; ERROR: isStaticCacheble = NO';
+
+				// if no file was created check if an existing file from a previous run should be deleted
+			if (!$fileCreated) {
+				$pageTSconfig = t3lib_BEfunc::getPagesTSconfig($origId);
+				if (true || !empty($pageTSconfig['tx_staticpub.']['deleteOldFiles'])) {
+					$fileName = $fI['path'] . $fI['file'];
+					$res = $this->removeFile($fileName);
+
+					// some logging while developing. Remove later!
+					if (!$res) {
+						file_put_contents($pubDir. '/.removedfiles', $fileName.chr(10), FILE_APPEND);
+					} else {
+						file_put_contents($pubDir. '/.removedfiles', $fileName . ' failed ' . chr(10), FILE_APPEND);
+					}
+				}
+			}
+
+
 		}
+
 		$GLOBALS['TT']->pull();
+	}
+
+	/**
+	 * Create url for this page
+	 *
+	 * @param void
+	 * @return string url
+	 */
+	function createUrl(tslib_fe $pObj) {
+		$getVars = t3lib_div::_GET();
+		$origId = intval($getVars['id']);
+		$origType = intval($getVars['type']);
+		unset($getVars['id']);
+		unset($getVars['type']);
+
+			// Create URL with link-function (should be the same as a script in the frontend would make to link to this script):
+		$urlData = $pObj->tmpl->linkData($pObj->sys_page->getPage($origId),'',FALSE,'','',t3lib_div::implodeArrayForUrl('',$getVars),$origType);
+		$siteScript = $urlData['totalURL'];
+
+		return $siteScript;
 	}
 }
 
