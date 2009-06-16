@@ -138,19 +138,11 @@ class tx_staticpub_fe extends tx_staticpub {
 				// if no file was created check if an existing file from a previous run should be deleted
 			if (!$fileCreated) {
 				$pageTSconfig = t3lib_BEfunc::getPagesTSconfig($origId);
-				if (true || !empty($pageTSconfig['tx_staticpub.']['deleteOldFiles'])) {
+				if (!empty($pageTSconfig['tx_staticpub.']['deleteOldFiles'])) {
 					$fileName = $fI['path'] . $fI['file'];
 					$res = $this->removeFile($fileName);
-
-					// some logging while developing. Remove later!
-					if (!$res) {
-						file_put_contents($pubDir. '/.removedfiles', $fileName.chr(10), FILE_APPEND);
-					} else {
-						file_put_contents($pubDir. '/.removedfiles', $fileName . ' failed ' . chr(10), FILE_APPEND);
-					}
 				}
 			}
-
 
 		}
 

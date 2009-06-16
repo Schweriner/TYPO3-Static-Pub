@@ -149,7 +149,8 @@ class tx_staticpub {
 	 */
 	function createStaticFile($path,$file,$content,$pubDir,$page_id,$options=array())	{
 
-		$htmlparser = t3lib_div::makeInstance('t3lib_parsehtml'); /* @var $htmlparser t3lib_parsehtml */
+		/* @var $htmlparser t3lib_parsehtml */
+		$htmlparser = t3lib_div::makeInstance('t3lib_parsehtml');
 
 			// Fix base URL:
 		if (isset($options['overruleBaseUrl']))	{
@@ -172,7 +173,10 @@ class tx_staticpub {
 			// Split by resource:
 		$log = array();
 		$token = md5(microtime());
-		$parts = explode($token,$htmlparser->prefixResourcePath($token,$content,array(),$token));
+		$parts = explode($token, $htmlparser->prefixResourcePath($token, $content, array(), $token));
+
+		if (TYPO3_DLOG) t3lib_div::devLog('Parts', 'staticpub', 1, $parts);
+
 		foreach($parts as $k => $v)	{
 			if ($k%2)	{
 				$uParts = parse_url($v);
@@ -181,7 +185,7 @@ class tx_staticpub {
 						// Include resources:
 					if ($options['includeResources'])	{
 						$fI = t3lib_div::split_fileref($uParts['path']);
-						if (t3lib_div::inList('gif,jpeg,jpg,png,css,js,swf',$fI['fileext']))	{
+						if (t3lib_div::inList('gif,jpeg,jpg,png,css,js,swf', $fI['fileext']))	{
 							$fileName = t3lib_div::getFileAbsFileName($v);
 							if (@is_file($fileName))	{
 								if (!isset($log[$v]))	{
