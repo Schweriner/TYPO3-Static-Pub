@@ -82,11 +82,11 @@ class tx_staticpub_fe extends tx_staticpub {
 	 * Publishes the current page as static HTML file if possible (depends on configuration and other circumstances)
 	 * (Hook-function called from TSFE, see ext_localconf.php for configuration)
 	 *
-	 * @param	object		Reference to parent object (TSFE)
+	 * @param	tslib_fe	Reference to parent object (TSFE)
 	 * @param	integer		[Not used here]
 	 * @return	void
 	 */
-	function insertPageIncache(tslib_fe $pObj,$timeOutTime)	{
+	function insertPageIncache(tslib_fe $pObj, $timeOutTime)	{
 
 		$GLOBALS['TT']->push('tx_staticpub','');
 
