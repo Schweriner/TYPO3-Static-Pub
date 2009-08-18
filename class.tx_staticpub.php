@@ -115,6 +115,8 @@ class tx_staticpub {
 			}
 			if (@is_dir($pubDirAbs)) {
 				return $pubDirAbs;
+			} else {
+				$GLOBALS['TSFE']->applicationData['tx_crawler']['log'][] = 'EXT:staticpub getPublishdir - target directory is not existing '.$pubDirAbs;
 			}
 		}
 	}

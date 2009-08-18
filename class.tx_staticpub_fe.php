@@ -114,8 +114,7 @@ class tx_staticpub_fe extends tx_staticpub {
 						// Get positive confirmation that either "simulateStaticDocument" or "realurl" was processed right!
 					if ($origId === $pObj->id)	{
 
-							// check if the query if not empty
-						if (!strcmp($uParts['query'],''))	{
+						if (!$this->hasInvalidQueryparts($uParts['query']))	{
 
 								// check if the file extension is empty, "html" or "htm"
 							if (!strcmp($fI['fileext'],'') || t3lib_div::inList('html,htm',$fI['fileext']))	{
@@ -125,7 +124,7 @@ class tx_staticpub_fe extends tx_staticpub {
 
 									// check if the file has been created successfully
 								if ($res) {
-									$pObj->applicationData['tx_crawler']['log']['tx_staticpub'] = 'EXT:static_pub; OK: "'.$siteScript.'" published in "'.substr($pubDir,strlen(PATH_site)).'". Msg: '.$res;
+									$pObj->applicationData['tx_crawler']['log']['tx_staticpub'] = 'EXT:static_pub; OK: "'.$uParts['path'].'" published in "'.substr($pubDir,strlen(PATH_site)).'". Msg: '.$res;
 									$pObj->applicationData['tx_crawler']['success']['tx_staticpub'] = true;
 									$fileCreated = true;
 								} else $pObj->applicationData['tx_crawler']['log']['tx_staticpub'] = 'EXT:static_pub; ERROR: '.$this->errorMsg;
@@ -134,7 +133,11 @@ class tx_staticpub_fe extends tx_staticpub {
 					} else $pObj->applicationData['tx_crawler']['log']['tx_staticpub'] = 'EXT:static_pub; ERROR: GET var ID ("'.$origId.'") did not match TSFE->id ("'.$pObj->id.'")!';
 				} else $pObj->applicationData['tx_crawler']['log']['tx_staticpub'] = 'EXT:static_pub; ERROR: No publishing directory was configured.';
 			} else $pObj->applicationData['tx_crawler']['log']['tx_staticpub'] = 'EXT:static_pub; ERROR: isStaticCacheble = NO';
-
+			
+			if($this->errorMsg) {
+				$pObj->applicationData['tx_crawler']['log'][] = $this->errorMsg; 
+			}
+			
 				// if no file was created check if an existing file from a previous run should be deleted
 			if (!$fileCreated) {
 				$pageTSconfig = t3lib_BEfunc::getPagesTSconfig($origId);
@@ -144,6 +147,12 @@ class tx_staticpub_fe extends tx_staticpub {
 				}
 			}
 
+		} elseif(!t3lib_extMgm::isLoaded('crawler')) {
+			$pObj->applicationData['tx_crawler']['log']['tx_staticpub'] = 'EXT:static_pub; ERROR: crawler is not loaded';
+		} elseif(!$pObj->applicationData['tx_crawler']['running']) {
+			$pObj->applicationData['tx_crawler']['log']['tx_staticpub'] = 'EXT:static_pub; ERROR: crawler is not running';
+		} elseif(!in_array('tx_staticpub_publish', $pObj->applicationData['tx_crawler']['parameters']['procInstructions'])) {
+			$pObj->applicationData['tx_crawler']['log']['tx_staticpub'] = 'EXT:static_pub; ERROR: no procInstructions given';
 		}
 
 		$GLOBALS['TT']->pull();
@@ -168,6 +177,26 @@ class tx_staticpub_fe extends tx_staticpub {
 
 		return $siteScript;
 	}
+
+	/**
+	 * Check whether there're parts within the query
+	 * which aren't related to a possible workspace-publish
+	 * 
+	 * @param $str	the query-string
+	 * @return boolean
+	 */
+	function hasInvalidQueryparts($str) {
+		if(strcmp($str,'')===0) return false;
+		$query=array();
+		parse_str($str,$query);
+		foreach($query as $key=>$value) {
+			if(substr($key,0,6)!='ADMCMD') {
+				return true;
+			}
+		}
+		return false;
+	}
+	
 }
 
 
