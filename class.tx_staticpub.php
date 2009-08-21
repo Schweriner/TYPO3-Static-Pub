@@ -120,6 +120,41 @@ class tx_staticpub {
 			}
 		}
 	}
+	
+	/**
+	 * Gets list of configured resource types (file extensions) allowed for static publishing.
+	 * 
+	 * @param  array $conf  Staticpub crawler configuration array.
+	 * @return string		Comma separated list of resource file extensions.
+	 * @author Chetan Thapliyal <chetan.thapliyal@aoemedia.de>
+	 */
+	protected function getResourceWhitelist( array $conf=null ) {
+		# Default resource types allowed for publishing
+		$whitelist = 'gif,jpeg,jpg,png,ico,css,js,swf';
+		
+		# Check for domain level whitelist configuration
+		if ( $conf && isset($conf['resources.']['whitelist']) ) {
+			$resourceWhitelist = explode( ',', $conf['resources.']['whitelist'] );
+		} else {
+			# Check for globally configured whitelist configuration
+			$extConf = $GLOBALS['TYPO3_CONF_VARS']["EXT"]["extConf"]['staticpub'];
+			$extConf = unserialize( $extConf );
+			
+			if ( array_key_exists('resourceWhitelist', $extConf) ) {
+				$resourceWhitelist = explode( ',', $extConf['resourceWhitelist'] );
+			}
+		}
+		
+		if ( isset($resourceWhitelist) ) {
+			$resourceWhitelist = implode( ',', array_map('trim', $resourceWhitelist) );
+			
+			if ( 0 < strlen($resourceWhitelist) ) {
+				$whitelist = strtolower( $resourceWhitelist );
+			}
+		}
+		
+		return $whitelist;
+	}
 
 
 
@@ -149,99 +184,367 @@ class tx_staticpub {
 	 * @param	array		Options. Key: includeResources=boolean; decides if resources are rendered or not.
 	 * @return	string		Success-message
 	 */
-	function createStaticFile($path,$file,$content,$pubDir,$page_id,$options=array())	{
+	function createStaticFile($path,$file,$content,$pubDir,$page_id,$options=array()) {
 
-		/* @var $htmlparser t3lib_parsehtml */
-		$htmlparser = t3lib_div::makeInstance('t3lib_parsehtml');
-
-			// Fix base URL:
-		if (isset($options['overruleBaseUrl']))	{
-			$parts = $htmlparser->splitTags('base',$content,1);
-			if (isset($parts[1]))	{
+		# Fix base URL:
+		if ( isset($options['overruleBaseUrl']) )	{
+			$parts = $htmlparser->splitTags( 'base', $content, 1 );
+			
+			if ( isset($parts[1]) ) {
 				$parts[1] = !$options['overruleBaseUrl'] ? '' : '<base href="'.htmlspecialchars($options['overruleBaseUrl']).'" />';
-				$content = implode('',$parts);
+				$content = implode( '', $parts );
 			}
 		}
 
-			// Find relative path prefix for file:
-		if ($options['includeResources']==='relPath')	{
-			$prefixN = count(explode('/',$path))-1;
+		# Find relative path prefix for file:
+		if ( $options['includeResources'] === 'relPath' ) {
+			$prefixN = count( explode('/', $path) ) - 1;
+			if( '/' == substr($path, -1) ) $prefixN--;
+			
 			$prefixStr = '';
-			for($a=0;$a<$prefixN;$a++)	{
-				$prefixStr.='../';
+			
+			for( $i = 0; $i < $prefixN; $i++ ) {
+				$prefixStr .= '../';
+			}
+		}
+		
+		if ( $options['includeResources'] || $options['checkLinks'] ) {
+			$token = md5( microtime() );
+			$htmlparser = t3lib_div::makeInstance( 't3lib_parsehtml' );
+			$parts = explode( $token, $htmlparser->prefixResourcePath($token, $content, array(), $token) );
+			
+			if ( array_key_exists('includeResources', $options) ) {
+				# Extract resources from content
+				$resources = array();
+				$partsCount = count( $parts );
+				
+				for ( $i = 1; $i <= $partsCount; $i += 2 ) {
+					$resources[] = $parts[$i];
+				}
+				
+				$miscellaneousResources = $this->extractResources( $content, $path );
+				$resources = array_merge( $resources, $miscellaneousResources );
+				
+				# Parse resources for further resource references
+				$additionalResources = array();
+				
+				foreach ( $resources as $index => $resource ) {
+					$resourceType = strtoupper( substr($resource, -3) );
+				
+					if ( !strcmp('CSS', $resourceType) ) {
+						$fileInfo = pathinfo( $resource );
+						$fileContent = file_get_contents( PATH_site . $fileInfo['dirname'] . '/' . $fileInfo['basename'] );
+						$moreResources = $this->extractResources( $fileContent, $fileInfo['dirname'] . '/', true );
+						$additionalResources = array_merge( $additionalResources, $moreResources );
+					}
+				}
+				
+				$resources = array_merge( $resources, $additionalResources );
+				
+				# Get resources from static includes
+				$resources = array_merge( $resources, $this->getResourcesFromStaticIncludes($options) );
+				
+				# Get resources from reference index if enabled
+				if ( isset($options['resources.']['refIndexLookUp']) && ('1' == $options['resources.']['refIndexLookUp']) ) {
+					$resources = array_merge( $resources, $this->getResourcesFromRefIndex($page_id) );
+				}
+				
+				# Get rid of duplicate resources
+				$resource = array_unique( $resources );
+				
+				# Copy resources to configured static-pub folder
+				$this->includeResources( $resources, $pubDir, $page_id, $options );
+			}
+			
+			foreach ( $parts as $k => $v ) {
+				if ( $k % 2 ) {
+					$noPrefix = false;
+					
+					# Check links
+					if ( array_key_exists('checkLinks', $options) ) {
+						if ( 0 && preg_match('/<a[^<>]+$/', $parts[$k-1]) ) {
+	
+							# Resource is a directory, add default script name "index.html"
+							if ( '/' == substr($parts[$k], -1) ) $parts[$k] .= 'index.html';
+	
+							# Set JavaScript notice when no file found:
+							if ( !@is_file($pubDir.$parts[$k]) ) {
+								$parts[$k] = 'javascript:alert("Sorry, this link is disabled in the offline version");return false;';
+								$noPrefix = true;
+							}
+						}
+					}
+
+					# Fix relative path of resources (including links):
+					if ( $options['includeResources'] === 'relPath' && !$noPrefix ) {
+						$parts[$k] = $prefixStr . $parts[$k];
+					}
+				}
+			}
+
+			# Update if source has changed:
+			if ( ($options['includeResources'] === 'relPath') || $options['checkLinks'] )	{
+				$content = implode( '', $parts );
 			}
 		}
 
-			// Split by resource:
+	    if ( $options['addComment'] ) $content.='<!-- sp - '.date(r).'--->';
+
+		# Check for file prefix
+	    $path = $this->getResourcePrefix($file, $options) . ltrim($path, '/');
+	    
+		# Write file:
+		$msg = $this->createFile( $path, $file, $content, $pubDir, $page_id );
+
+		return $msg;
+	}
+	
+	/**
+	 * Copies resource files to configured publishing folder.
+	 *
+	 * @param  array 	$resources	An array of relative (w.r.t TYPO3 root) resource links.
+	 * @param  string 	$pubDir		Absolute path to publish directory.
+	 * @param  integer 	$pid		Page ID.
+	 * @param  array	$options	Crawler configuration.
+	 * @return void
+	 * @author Chetan Thapliyal <chetan.thapliyal@aoemedia.de>
+	 */
+	protected function includeResources( array $resources, $pubDir, $pid, $options ) {
+		
 		$log = array();
-		$token = md5(microtime());
-		$parts = explode($token, $htmlparser->prefixResourcePath($token, $content, array(), $token));
-
-		if (TYPO3_DLOG) t3lib_div::devLog('Parts', 'staticpub', 1, $parts);
-
-		foreach($parts as $k => $v)	{
-			if ($k%2)	{
-				$uParts = parse_url($v);
-				if (!strcmp($uParts['query'],''))	{
-
-						// Include resources:
-					if ($options['includeResources'])	{
-						$fI = t3lib_div::split_fileref($uParts['path']);
-						if (t3lib_div::inList('gif,jpeg,jpg,png,css,js,swf', $fI['fileext']))	{
-							$fileName = t3lib_div::getFileAbsFileName($v);
-							if (@is_file($fileName))	{
-								if (!isset($log[$v]))	{
-									$fI = t3lib_div::split_fileref($v);
-									$this->createFile($fI['path'],$fI['file'],t3lib_div::getUrl($fileName),$pubDir,$page_id,TRUE);
-
-									$GLOBALS['TSFE']->applicationData['tx_crawler']['log'][] = 'YES:'.$v.' - ';
-									$log[$v] = $v;
-								}
-							}
-						}
-					}
-
-						// Check links;
-						// A: Resource is a directory, add default script name "index.html":
-						// B: If
-					$noPrefix=FALSE;
-					if ($options['checkLinks'])	{
-						if (ereg('<a[^<>]+$',$parts[$k-1]))	{
-
-								// Set full name for links to directories:
-							if (substr($parts[$k],-1)=="/")	{
-								$parts[$k].='index.html';
-							}
-
-								// Set JavaScript notice when no file found:
-							if (!@is_file($pubDir.$parts[$k]))	{
-								$parts[$k] = "javascript:alert('Sorry, this link is disabled in the offline version');return false;";
-								$noPrefix=TRUE;
-							}
-						}
-					}
-
-						// Fix relative path of resources (including links):
-					if ($options['includeResources']==='relPath' && !$noPrefix)	{
-						$parts[$k] = $prefixStr.$parts[$k];
+		$resourceWhitelist = $this->getResourceWhitelist( $options );
+		
+		foreach ( $resources as $resource ) {
+			$fileInfo = t3lib_div::split_fileref( $resource );
+			
+			if ( t3lib_div::inList($resourceWhitelist, $fileInfo['fileext']) )	{
+				$fileName = t3lib_div::getFileAbsFileName( $resource );
+					
+				if ( @is_file($fileName) ) {
+					if ( !isset($log[$resource]) ) {
+						$fileInfo = t3lib_div::split_fileref( $resource );
+						$path = $this->getResourcePrefix($fileInfo['file'], $options) . $fileInfo['path'];
+						$this->createFile( $path, $fileInfo['file'], t3lib_div::getUrl($fileName), $pubDir, $pid, true );
+	
+						$GLOBALS['TSFE']->applicationData['tx_crawler']['log'][] = 'YES:' . $resource . ' - ';
+						$log[$resource] = $resource;
 					}
 				}
 			}
 		}
-
-			// Update if source has changed:
-		if ($options['includeResources']==='relPath' || $options['checkLinks'])	{
-			$content = implode('',$parts);
-
+	}
+	
+	/**
+	 * Extracts resource links from given content. It includes resources defined both inline as well as in external CSS files.
+	 * If a CSS file includes other CSS files then they are also parsed.
+	 * 
+	 * @param  string  $content		Content to scan for resource links.
+	 * @param  string  $path		Path to the content file. Require to resolve relative path.
+	 * @param  boolean $recursive	Flag to specify whether or not to parse fetched resources recursively for containing resources.
+	 * @return array				Array of fetched resource links.
+	 * @author Chetan Thapliyal <chetan.thapliyal@aoemedia.de>
+	 */
+	protected function extractResources( $content, $path, $recursive=false ) {
+	
+		$resources = array();
+		$resourceLocations = array( 'fileadmin', 'uploads', 'typo3temp', 'typo3conf' );
+	
+		# Define patterns here to extract the desired resources
+		$patterns = array(
+						# Pattern to match resources defined in style properties
+						'url\(\s*[\'"]?([^\(\)\'"\s]+)[\'"]?\s*\)',
+	
+						# Pattern for matching CSS resources defined via @import "stylesheet.css"
+						'@import\s+[\'"]([^\(\)\'"]+)[\'|"]'
+					);
+		$pattern = '/(?:' . implode( ')|(?:', $patterns ) . ')/i';
+		$matchCount = preg_match_all( $pattern, $content, $matches );
+	
+		if ( $matchCount && (0 < $matchCount) ) {
+	
+			$matchedResources = array();
+			$patternCount = count( $patterns );
+	
+			for ( $i = 1; $i <= $patternCount; ++$i ) {
+				$resources = array_merge( $resources, array_filter($matches[$i]) );
+			}
+	
+			# Resolve path for resources
+			foreach ( $resources as $index => $resource ) {
+				$resourceRoot = substr( $resource, 0, strpos($resource, '/') );
+				
+				if ( !in_array($resourceRoot, $resourceLocations) && strcmp('/', $resource{0}) ) {
+					$resources[$index] = t3lib_div::resolveBackPath( $path . $resource );
+				} else {
+					$resources[$index] = t3lib_div::resolveBackPath( $resource );
+				}
+			}
+	
+			# Check if extracted resources need to be parsed for containing resources
+			if ( $recursive ) {
+			  $additionalResources = array();
+	
+				foreach ( $resources as $index => $resource ) {
+					$resourceType = strtoupper( substr($resource, -3) );
+	
+					if ( !strcmp('CSS', $resourceType) ) {
+						$fileInfo = pathinfo( $resource );
+						$fileContent = file_get_contents( PATH_site . $fileInfo['dirname'] . '/' . $fileInfo['basename'] );
+						$moreResources = $this->extractResources( $fileContent, $fileInfo['dirname'] . '/', true );
+						$additionalResources = array_merge( $additionalResources, $moreResources );
+					}
+				}
+	
+				$resources = array_merge( $resources, $additionalResources );
+			}
 		}
-	    if ($options['addComment']) {
-				$content.='<!-- sp - '.date(r).'--->';;
+	
+		return $resources;
+	}
+	
+	/**
+	 * Returns resources for the page by looking up in the reference index table.
+	 * 
+	 * @param  integer $pid		Page-ID to extract the resources for.
+	 * @return array 			An array of TYPO3 relative resource file paths.
+	 * @author Chetan Thapliyal <chetan.thapliyal@aoemedia.de> 
+	 */
+	protected function getResourcesFromRefIndex( $pid ) {
+		$resources = array();
+		
+		$resSelectQuery = '
+			SELECT `sys_refindex`.ref_string
+			FROM `sys_refindex`
+			LEFT JOIN `tt_content` ON `sys_refindex`.recuid = `tt_content`.uid
+			WHERE `tt_content`.pid = ' . $pid . '
+					AND `sys_refindex`.ref_table = \'_FILE\'
+					AND `sys_refindex`.deleted = 0';
+		$res = $GLOBALS['TYPO3_DB']->sql_query( $resSelectQuery );
+		
+		if ( $res && (0 < $GLOBALS['TYPO3_DB']->sql_num_rows($res)) ) {
+			while ( $record = $GLOBALS['TYPO3_DB']->sql_fetch_assoc($res) ) {
+				$resources[] = $record['ref_string'];
+			}
 		}
-
-			// Write file:
-		$msg = $this->createFile($path,$file,$content,$pubDir,$page_id);
-
-		return $msg;
+		
+		return $resources;
+	}
+	
+	/**
+	 * Gets resources from locations specified in staticpub crawler configuration.
+	 *
+	 * @param  array $conf	Staticpub crawler configuration.
+	 * @return array		Array of TYPO3 relative resource file paths.
+	 * @author Chetan Thapliyal <chetan.thapliyal@aoemedia.de>
+	 */
+	protected function getResourcesFromStaticIncludes( array $conf ) {
+		$resources = array();
+		
+		if ( isset($conf['resources.']['staticIncludes.']) && is_array($conf['resources.']['staticIncludes.']) ) {
+			$staticIncludes = $conf['resources.']['staticIncludes.'];
+			
+			foreach ( $staticIncludes as $resource ) {
+				$resource = t3lib_div::getFileAbsFileName( $resource );
+				
+				if ( @is_file($resource) ) {
+					$resources[] = substr( $resource, strlen(PATH_site) );
+				} else {
+					if ( @is_dir($resource) ) {
+						$resources = array_merge( $resources, $this->getResourcesFromDirectory($resource) );
+					}
+				}
+			}
+		}
+		
+		return $resources;
+	}
+	
+	/**
+	 * Gets resources from locations specified in staticpub crawler configuration.
+	 *
+	 * @param  array 	$absDirPath	Absoute directory path to parse for resource files.
+	 * @param  integer 	$depth		A dummy parameter to control recusion level for sub-directories parsing.
+	 * @return array				Array of TYPO3 relative resource file paths.
+	 * @author Chetan Thapliyal <chetan.thapliyal@aoemedia.de>
+	 */
+	protected function getResourcesFromDirectory( $absDirPath, $depth=0 ) {
+		$resources = array();
+		
+		if ( 25 > $depth ) {
+			if ( $dir = @opendir($absDirPath) ) {
+				while ( $element = readdir($dir) ) {
+					if ( '.' != substr($element, 0, 1) ) {
+						$element = $absDirPath . '/' . $element;
+						
+						if ( @is_file($element) ) {
+							$resources[] = substr( $element, strlen(PATH_site) );
+						} else {
+							if ( @is_dir($element) ) {
+								$resources = array_merge( $resources, $this->getResourcesFromDirectory($element, ++$depth) );
+							}
+						}
+					}
+				}
+				
+				closedir( $dir );
+			}
+		}
+		
+		return $resources;
+	}
+	
+	/**
+	 * Resolves static path for given file using provided configuration. 
+	 *
+	 * @param  string $file  File name.
+	 * @param  string $path  Relative (w.r.t TYPO3 root) file path.
+	 * @param  array  $conf  Staticpub crawler configuration.
+	 * @return string        Static path string.
+	 * @author Chetan Thapliyal <chetan.thapliyal@aoemedia.de>
+	 */
+	protected function getResourcePrefix( $file, array $conf ) {
+		
+		$prefix = '';
+		static $parsedConf;
+		
+		if ( !is_array($parsedConf) ) {
+			$parsedConf['fileTypes'] = array();
+			
+			if ( array_key_exists('resources.', $conf) && is_array($conf['resources.']) ) {
+				foreach( $conf['resources.'] as $index => $resourceConf ) {
+					if ( is_array($resourceConf) && array_key_exists('fileTypes', $resourceConf) ) {
+						$resourceTypes = explode( ',', $resourceConf['fileTypes'] );
+						$resourceTypes = array_map( 'trim', $resourceTypes );
+						$resourceTypes = array_map( 'strtoupper', $resourceTypes );
+						
+						$pathPrefix = array_key_exists('pathPrefix', $resourceConf) ? $resourceConf['pathPrefix'] : '';
+						$parsedConf['pathPrefixes'][$index] = rtrim($pathPrefix, '/');
+						
+						foreach ( $resourceTypes as $type ) {
+							$parsedConf['fileTypes'][$type] = $index;
+						}
+					}
+				}
+			
+				# Set defaults
+				if ( isset($conf['resources.']['default.']['pathPrefix']) ) {
+					$parsedConf['pathPrefixes']['default'] = rtrim( $conf['resources.']['default.']['pathPrefix'], '/' );
+				} else {
+					$parsedConf['pathPrefixes']['default'] = '';
+				}
+			}
+		}
+		
+		# Get file extension
+		$fileExt = strtoupper( substr($file, -3) );
+		
+		if ( array_key_exists($fileExt, $parsedConf['fileTypes']) ) {
+			$prefix = $parsedConf['pathPrefixes'][$parsedConf['fileTypes'][$fileExt]];
+		} else {
+			$prefix = $parsedConf['pathPrefixes']['default'];
+		}
+		
+		return $prefix . '/';
 	}
 
 	/**
@@ -261,7 +564,7 @@ class tx_staticpub {
 			// If there is a path prefix then create the path if not created already...:
 		if (!@is_dir($pubDir.$path) && strcmp($path,'') && $path!='/')	{
 			$this->errorMsg = $this->createPath($path,$pubDir);
-			if ($this->errorMsg)	{
+			if ($this->errorMsg) {
 				return;
 			}
 		}

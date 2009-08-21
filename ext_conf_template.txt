@@ -1,0 +1,2 @@
+ 	# cat=basic; type=string; label=Publish resources:Comma separated list of resources allowed for publishing.
+resourceWhitelist = gif,jpeg,jpg,png,ico,css,js,swf
