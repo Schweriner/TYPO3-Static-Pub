@@ -188,6 +188,7 @@ class tx_staticpub {
 
 		# Fix base URL:
 		if ( isset($options['overruleBaseUrl']) )	{
+			$htmlparser = t3lib_div::makeInstance( 't3lib_parsehtml' );
 			$parts = $htmlparser->splitTags( 'base', $content, 1 );
 			
 			if ( isset($parts[1]) ) {
@@ -322,11 +323,15 @@ class tx_staticpub {
 					
 				if ( @is_file($fileName) ) {
 					if ( !isset($log[$resource]) ) {
-						$fileInfo = t3lib_div::split_fileref( $resource );
-						$path = $this->getResourcePrefix($fileInfo['file'], $options) . $fileInfo['path'];
-						$this->createFile( $path, $fileInfo['file'], t3lib_div::getUrl($fileName), $pubDir, $pid, true );
+						$fileInfo 	= t3lib_div::split_fileref( $resource );
+						$path 		= $this->getResourcePrefix($fileInfo['file'], $options) . $fileInfo['path'];
+						$msg 		= $this->createFile( $path, $fileInfo['file'], t3lib_div::getUrl($fileName), $pubDir, $pid, true );
 	
-						$GLOBALS['TSFE']->applicationData['tx_crawler']['log'][] = 'YES:' . $resource . ' - ';
+						$logEntry = array();
+						$logEntry['fileInfo'] = $fileInfo;
+						$logEntry['resource'] = $resource;
+						$logEntry['message'] = $msg;
+						$GLOBALS['TSFE']->applicationData['tx_crawler']['log']['resources'][$fileInfo['fileext']][] = $logEntry;
 						$log[$resource] = $resource;
 					}
 				}
@@ -587,10 +592,14 @@ class tx_staticpub {
 			if (is_array($existRec))	{
 
 				if (!is_file($pubDir.$path.$fN) || (md5_file($pubDir.$path.$fN) != md5($content))) {
+					
 					// Overwrite file if it has changed or does not exist
 					t3lib_div::writeFile($pubDir.$path.$fN, $content);
-
+					
+					if (TYPO3_DLOG) t3lib_div::devLog(sprintf('File "%s" was  changed and written', $path.$fN), 'staticpuc', 0);
+					
 					$message = 'Existing file updated.';
+					
 				} else {
 					if (TYPO3_DLOG) t3lib_div::devLog(sprintf('File "%s" has not changed', $path.$fN), 'staticpuc', 0);
 

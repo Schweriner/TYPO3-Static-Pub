@@ -124,7 +124,11 @@ class tx_staticpub_fe extends tx_staticpub {
 
 									// check if the file has been created successfully
 								if ($res) {
-									$pObj->applicationData['tx_crawler']['log']['tx_staticpub'] = 'EXT:static_pub; OK: "'.$uParts['path'].'" published in "'.substr($pubDir,strlen(PATH_site)).'". Msg: '.$res;
+									$publishPath = substr($pubDir,strlen(PATH_site));
+									$pObj->applicationData['tx_crawler']['log']['tx_staticpub_path'] = $uParts['path'];
+									$pObj->applicationData['tx_crawler']['log']['tx_staticpub_publishdir'] = $publishPath;
+									
+									$pObj->applicationData['tx_crawler']['log']['tx_staticpub'] = 'EXT:static_pub; OK: "'.$uParts['path'].'" published in "'.$publishPath.'". Msg: '.$res;
 									$pObj->applicationData['tx_crawler']['success']['tx_staticpub'] = true;
 									$fileCreated = true;
 								} else $pObj->applicationData['tx_crawler']['log']['tx_staticpub'] = 'EXT:static_pub; ERROR: '.$this->errorMsg;
