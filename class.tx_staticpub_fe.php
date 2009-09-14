@@ -120,14 +120,17 @@ class tx_staticpub_fe extends tx_staticpub {
 							if (!strcmp($fI['fileext'],'') || t3lib_div::inList('html,htm',$fI['fileext']))	{
 
 									// create file
-								$res = $this->createStaticFile($fI['path'], $fI['file'], $pObj->content, $pubDir, $origId, $pObj->applicationData['tx_crawler']['parameters']['procInstrParams']['tx_staticpub_publish.']);
+								$tsConfig = $pObj->applicationData['tx_crawler']['parameters']['procInstrParams']['tx_staticpub_publish.'];									
+								$res = $this->createStaticFile($fI['path'], $fI['file'], $pObj->content, $pubDir, $origId, $tsConfig);
 
 									// check if the file has been created successfully
 								if ($res) {
-									$publishPath = substr($pubDir,strlen(PATH_site));
-									$pObj->applicationData['tx_crawler']['log']['tx_staticpub_path'] = $uParts['path'];
-									$pObj->applicationData['tx_crawler']['log']['tx_staticpub_publishdir'] = $publishPath;
+									$publishPath 	= substr($pubDir,strlen(PATH_site));
 									
+									$pObj->applicationData['tx_crawler']['log']['tx_staticpub_resourceprefix'] 	= $this->getResourcePrefix($fI['file'], $tsConfig);		
+									$pObj->applicationData['tx_crawler']['log']['tx_staticpub_path']		 	= $uParts['path'];	
+									$pObj->applicationData['tx_crawler']['log']['tx_staticpub_publishdir'] 		= $publishPath;
+					
 									$pObj->applicationData['tx_crawler']['log']['tx_staticpub'] = 'EXT:static_pub; OK: "'.$uParts['path'].'" published in "'.$publishPath.'". Msg: '.$res;
 									$pObj->applicationData['tx_crawler']['success']['tx_staticpub'] = true;
 									$fileCreated = true;

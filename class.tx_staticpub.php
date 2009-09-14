@@ -294,9 +294,12 @@ class tx_staticpub {
 		# Check for file prefix
 	    $path = $this->getResourcePrefix($file, $options) . ltrim($path, '/');
 	    
+		
 		# Write file:
 		$msg = $this->createFile( $path, $file, $content, $pubDir, $page_id );
-
+		
+		
+		
 		return $msg;
 	}
 	
@@ -326,11 +329,13 @@ class tx_staticpub {
 						$fileInfo 	= t3lib_div::split_fileref( $resource );
 						$path 		= $this->getResourcePrefix($fileInfo['file'], $options) . $fileInfo['path'];
 						$msg 		= $this->createFile( $path, $fileInfo['file'], t3lib_div::getUrl($fileName), $pubDir, $pid, true );
-	
+			
 						$logEntry = array();
 						$logEntry['fileInfo'] = $fileInfo;
-						$logEntry['resource'] = $resource;
+						$logEntry['path'] = $path;
+						$logEntry['filename'] = $fileInfo['file'];
 						$logEntry['message'] = $msg;
+								
 						$GLOBALS['TSFE']->applicationData['tx_crawler']['log']['resources'][$fileInfo['fileext']][] = $logEntry;
 						$log[$resource] = $resource;
 					}
