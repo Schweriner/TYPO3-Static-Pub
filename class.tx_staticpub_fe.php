@@ -130,8 +130,9 @@ class tx_staticpub_fe extends tx_staticpub {
 									$pObj->applicationData['tx_crawler']['log']['tx_staticpub_resourceprefix'] 	= $this->getResourcePrefix($fI['file'], $tsConfig);		
 									$pObj->applicationData['tx_crawler']['log']['tx_staticpub_path']		 	= $uParts['path'];	
 									$pObj->applicationData['tx_crawler']['log']['tx_staticpub_publishdir'] 		= $publishPath;
+									$pObj->applicationData['tx_crawler']['log']['tx_staticpub_state'] 			= $res;
 					
-									$pObj->applicationData['tx_crawler']['log']['tx_staticpub'] = 'EXT:static_pub; OK: "'.$uParts['path'].'" published in "'.$publishPath.'". Msg: '.$res;
+									$pObj->applicationData['tx_crawler']['log']['tx_staticpub'] = 'EXT:static_pub; OK: "'.$uParts['path'].'" published in "'.$publishPath.'". Msg: '.$this->getMessageForState($res);
 									$pObj->applicationData['tx_crawler']['success']['tx_staticpub'] = true;
 									$fileCreated = true;
 								} else $pObj->applicationData['tx_crawler']['log']['tx_staticpub'] = 'EXT:static_pub; ERROR: '.$this->errorMsg;

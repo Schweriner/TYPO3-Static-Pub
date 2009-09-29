@@ -74,6 +74,16 @@ class tx_staticpub {
 	var $errorMsg = '';		// Error message.
 
 
+	const FILE_CREATED	= 111;
+	const FILE_CHANGED	= 222;
+	const FILE_NOCHANGE = 333;
+	
+	protected static $stateMessages = array(
+		111 => 'New file created',
+		222 => 'Existing file updated.',
+		333 => 'Existing file has not changed.',
+	);
+	
 	/**
 	 * Return directory for static publishing
 	 *
@@ -296,11 +306,9 @@ class tx_staticpub {
 	    
 		
 		# Write file:
-		$msg = $this->createFile( $path, $file, $content, $pubDir, $page_id );
+		$result = $this->createFile( $path, $file, $content, $pubDir, $page_id );
 		
-		
-		
-		return $msg;
+		return $result;
 	}
 	
 	/**
@@ -328,20 +336,32 @@ class tx_staticpub {
 					if ( !isset($log[$resource]) ) {
 						$fileInfo 	= t3lib_div::split_fileref( $resource );
 						$path 		= $this->getResourcePrefix($fileInfo['file'], $options) . $fileInfo['path'];
-						$msg 		= $this->createFile( $path, $fileInfo['file'], t3lib_div::getUrl($fileName), $pubDir, $pid, true );
+						$state 		= $this->createFile( $path, $fileInfo['file'], t3lib_div::getUrl($fileName), $pubDir, $pid, true );
 			
 						$logEntry = array();
 						$logEntry['fileInfo'] = $fileInfo;
 						$logEntry['path'] = $path;
 						$logEntry['filename'] = $fileInfo['file'];
-						$logEntry['message'] = $msg;
-								
+						$logEntry['state']	= $state;
+						$logEntry['message'] = $this->getMessageForState($state);
+						
+										
 						$GLOBALS['TSFE']->applicationData['tx_crawler']['log']['resources'][$fileInfo['fileext']][] = $logEntry;
 						$log[$resource] = $resource;
 					}
 				}
 			}
 		}
+	}
+	
+	/**
+	 * Creates and returns a message for a file creation state.
+	 *
+	 * @param $state
+	 * @return string
+	 */
+	protected function getMessageForState($state){
+		return self::$stateMessages[$state];
 	}
 	
 	/**
@@ -603,18 +623,18 @@ class tx_staticpub {
 					
 					if (TYPO3_DLOG) t3lib_div::devLog(sprintf('File "%s" was  changed and written', $path.$fN), 'staticpuc', 0);
 					
-					$message = 'Existing file updated.';
+					$result = self::FILE_CHANGED; 
 					
 				} else {
 					if (TYPO3_DLOG) t3lib_div::devLog(sprintf('File "%s" has not changed', $path.$fN), 'staticpuc', 0);
 
-					$message = 'Existing file has not changed.';
+					$result = self::FILE_NOCHANGE;
 				}
 
 					// Create record for published file:
 				$this->createRecordForFile($path.$fN, $isResource?0:$page_id, TRUE);
 
-				return $message;
+				return $result;
 			} else {
 					// Write new file:
 				t3lib_div::writeFile($pubDir.$path.$fN, $content);
@@ -622,7 +642,7 @@ class tx_staticpub {
 					// Create record for published file:
 				$this->createRecordForFile($path.$fN, $isResource?0:$page_id);
 
-				return 'New file created';
+				return self::FILE_CREATED;
 			}
 		} else {
 			$this->errorMsg = 'Path "'.$pubDir.$path.'" was not valid.';
@@ -804,7 +824,6 @@ class tx_staticpub {
 			return TRUE;
 		} else die('INTEGRITY CHECK on "'.$fileOrDirToDelete.'" FAILED!');
 	}
-
 
 
 
