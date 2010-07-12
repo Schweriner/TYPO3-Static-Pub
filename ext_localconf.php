@@ -11,5 +11,7 @@ if (TYPO3_MODE=='FE')	{
 $GLOBALS['TYPO3_CONF_VARS']['EXTCONF']['crawler']['procInstructions']['tx_staticpub_publish'] = 'Publish static';
 $GLOBALS['TYPO3_CONF_VARS']['EXTCONF']['crawler']['pollSuccess'][] = 'tx_staticpub';
 
-$GLOBALS['TYPO3_CONF_VARS']['EXTCONF']['staticpub']['publishDir'] = '_staticpub_';
+if (!isset($GLOBALS['TYPO3_CONF_VARS']['EXTCONF']['staticpub']['publishDir'])) {
+ $GLOBALS['TYPO3_CONF_VARS']['EXTCONF']['staticpub']['publishDir'] = '_staticpub_';
+}
 ?>
