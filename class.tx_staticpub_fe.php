@@ -92,7 +92,7 @@ class tx_staticpub_fe extends tx_staticpub {
 
 
 			// Look for "crawler" extension activity:
-			// Requirements are that the crawler is loaded, a crawler session is running and re-indexing requested as processing instruction:
+			// Requirements are that the crawler is loaded, a crawler session is running and tx_staticpub_publish requested as processing instruction:
 		if (t3lib_extMgm::isLoaded('crawler')
 				&& $pObj->applicationData['tx_crawler']['running']
 				&& in_array('tx_staticpub_publish', $pObj->applicationData['tx_crawler']['parameters']['procInstructions']))	{
@@ -161,6 +161,7 @@ class tx_staticpub_fe extends tx_staticpub {
 			$pObj->applicationData['tx_crawler']['log']['tx_staticpub'] = 'EXT:static_pub; ERROR: crawler is not running';
 		} elseif(!in_array('tx_staticpub_publish', $pObj->applicationData['tx_crawler']['parameters']['procInstructions'])) {
 			$pObj->applicationData['tx_crawler']['log']['tx_staticpub'] = 'EXT:static_pub; ERROR: no procInstructions given';
+			$pObj->applicationData['tx_crawler']['success']['tx_staticpub'] = true;
 		}
 
 		$GLOBALS['TT']->pull();
