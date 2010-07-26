@@ -123,14 +123,24 @@ class tx_staticpub {
 			if (substr($pubDirAbs,-1)!='/')	{
 				$pubDirAbs.='/';
 			}
-			if (@is_dir($pubDirAbs)) {
+			if (TRUE ===$this->autoCreatePublishDir($pubDirAbs)){
 				return $pubDirAbs;
-			} else {
-				$GLOBALS['TSFE']->applicationData['tx_crawler']['log'][] = 'EXT:staticpub getPublishdir - target directory is not existing '.$pubDirAbs;
 			}
 		}
 	}
-	
+	/**
+	 * @param string $pubDirAbs
+	 * @return boolean
+	 */
+	private function autoCreatePublishDir($pubDirAbs){
+		if(FALSE === is_dir($pubDirAbs)){
+			if (FALSE === mkdir($pubDirAbs, octdec($GLOBALS['TYPO3_CONF_VARS']['BE']['folderCreateMask']),TRUE)){
+				$GLOBALS['TSFE']->applicationData['tx_crawler']['log'][] = 'EXT:staticpub getPublishdir - target directory is not existing '.$pubDirAbs;
+				return FALSE;
+			}
+		}
+		return TRUE;
+	}
 	/**
 	 * Gets list of configured resource types (file extensions) allowed for static publishing.
 	 * 
