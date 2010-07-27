@@ -125,6 +125,8 @@ class tx_staticpub {
 			}
 			if (TRUE ===$this->autoCreatePublishDir($pubDirAbs)){
 				return $pubDirAbs;
+			}else{
+				$GLOBALS['TSFE']->applicationData['tx_crawler']['log'][] = 'EXT:staticpub getPublishdir - target directory is not existing '.$pubDirAbs;
 			}
 		}
 	}
@@ -135,7 +137,6 @@ class tx_staticpub {
 	private function autoCreatePublishDir($pubDirAbs){
 		if(FALSE === is_dir($pubDirAbs)){
 			if (FALSE === mkdir($pubDirAbs, octdec($GLOBALS['TYPO3_CONF_VARS']['BE']['folderCreateMask']),TRUE)){
-				$GLOBALS['TSFE']->applicationData['tx_crawler']['log'][] = 'EXT:staticpub getPublishdir - target directory is not existing '.$pubDirAbs;
 				return FALSE;
 			}
 		}
