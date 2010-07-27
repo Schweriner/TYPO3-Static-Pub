@@ -130,18 +130,7 @@ class tx_staticpub {
 			}
 		}
 	}
-	/**
-	 * @param string $pubDirAbs
-	 * @return boolean
-	 */
-	private function autoCreatePublishDir($pubDirAbs){
-		if(FALSE === is_dir($pubDirAbs)){
-			if (FALSE === mkdir($pubDirAbs, octdec($GLOBALS['TYPO3_CONF_VARS']['BE']['folderCreateMask']),TRUE)){
-				return FALSE;
-			}
-		}
-		return TRUE;
-	}
+	
 	/**
 	 * Gets list of configured resource types (file extensions) allowed for static publishing.
 	 * 
@@ -275,7 +264,7 @@ class tx_staticpub {
 				$resource = array_unique( $resources );
 				
 				# Copy resources to configured static-pub folder
-				$this->includeResources( $resources, $pubDir, $page_id, $options );
+				$this->includeResources( $resources, $this->getPublishDirForResources($pubDir,$options), $page_id, $options );
 			}
 			
 			foreach ( $parts as $k => $v ) {
@@ -318,7 +307,6 @@ class tx_staticpub {
 		
 		# Write file:
 		$result = $this->createFile( $path, $file, $content, $pubDir, $page_id );
-		
 		return $result;
 	}
 	
@@ -679,6 +667,7 @@ class tx_staticpub {
 					if (!@is_dir($pubDir.$partOfPath))	{
 						t3lib_div::mkdir($pubDir.$partOfPath);
 					}
+					
 					if (@is_dir($pubDir.$partOfPath))	{
 						$pubDir.=$partOfPath.'/';
 					} else return 'ERROR: Directory "'.$partOfPath.'" was still not created!';
@@ -877,6 +866,37 @@ class tx_staticpub {
 					'tx_staticpub_pages',
 					'page_id='.intval($page_id)
 				);
+	}
+	/**
+	 * @param string $publisDir default publishdir
+	 * @param array $options
+	 * @return string
+	 */
+	private function getPublishDirForResources($publisDir,array $options){
+		if(isset($options['publishDirForResources'])){
+			$publisDir = $options['publishDirForResources'];
+			$publisDir = t3lib_div::getFileAbsFileName($publisDir);
+			if (substr($publisDir,-1)!='/')	{
+				$publisDir.='/';
+			}
+		}
+		
+		if(FALSE === $this->autoCreatePublishDir($publisDir)){
+			$GLOBALS['TSFE']->applicationData['tx_crawler']['log'][] = 'EXT:staticpub getPublishDirForResources - could no create publishdir '.$publisDir;
+		} 
+		return $publisDir;
+	}
+	/**
+	 * @param string $pubDirAbs
+	 * @return boolean
+	 */
+	private function autoCreatePublishDir($pubDirAbs){
+		if(FALSE === is_dir($pubDirAbs)){
+			if (FALSE === mkdir($pubDirAbs, octdec($GLOBALS['TYPO3_CONF_VARS']['BE']['folderCreateMask']),TRUE)){
+				return FALSE;
+			}
+		}
+		return TRUE;
 	}
 }
 
