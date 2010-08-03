@@ -1,0 +1,6 @@
+@CHARSET "ISO-8859-1";
+
+background: url("typo3conf/ext/staticpub/tests/fixtures/image1.gif");
+background: url("/typo3conf/ext/staticpub/tests/fixtures/image2.gif");
+background: url("/typo3temp/../typo3conf/ext/staticpub/tests/fixtures/image3.gif");
+background: url("/typo3conf/ext/staticpub/../staticpub/tests/fixtures/image4.gif");

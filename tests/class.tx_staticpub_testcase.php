@@ -82,6 +82,26 @@ class tx_staticpub_testcase extends tx_phpunit_testcase {
 		$this->assertFileExists($this->pubDir.DIRECTORY_SEPARATOR.'res'.DIRECTORY_SEPARATOR.'typo3conf'.DIRECTORY_SEPARATOR.'ext'.DIRECTORY_SEPARATOR.'staticpub'.DIRECTORY_SEPARATOR.'ext_icon.gif','file not created');
 	}
 	/**
+	 * test method extractResources
+	 * @test
+	 */
+	public function extractResources(){
+		$path = 'hallo/';
+		$file = 'welt_mit_css.html';
+		$content = file_get_contents(dirname(__FILE__).DIRECTORY_SEPARATOR.'fixtures'.DIRECTORY_SEPARATOR.'welt_mit_css.html');
+		$page_id = 0;
+		$pubDir = $this->pubDir.DIRECTORY_SEPARATOR;
+		$publishDirForResources = $pubDir.'res';
+		t3lib_div::mkdir($publishDirForResources);
+		$options = array('includeResources'=>TRUE,'publishDirForResources'=>$publishDirForResources.DIRECTORY_SEPARATOR);
+		$this->tx_staticpub->createStaticFile($path,$file,$content,$pubDir,$page_id,$options);
+		$this->assertFileExists($this->pubDir.DIRECTORY_SEPARATOR.'res'.DIRECTORY_SEPARATOR.'typo3conf'.DIRECTORY_SEPARATOR.'ext'.DIRECTORY_SEPARATOR.'staticpub'.DIRECTORY_SEPARATOR.'tests'.DIRECTORY_SEPARATOR.'fixtures'.DIRECTORY_SEPARATOR.'test.css','file not created');
+		$this->assertFileExists($this->pubDir.DIRECTORY_SEPARATOR.'res'.DIRECTORY_SEPARATOR.'typo3conf'.DIRECTORY_SEPARATOR.'ext'.DIRECTORY_SEPARATOR.'staticpub'.DIRECTORY_SEPARATOR.'tests'.DIRECTORY_SEPARATOR.'fixtures'.DIRECTORY_SEPARATOR.'image1.gif','file not created');
+		$this->assertFileExists($this->pubDir.DIRECTORY_SEPARATOR.'res'.DIRECTORY_SEPARATOR.'typo3conf'.DIRECTORY_SEPARATOR.'ext'.DIRECTORY_SEPARATOR.'staticpub'.DIRECTORY_SEPARATOR.'tests'.DIRECTORY_SEPARATOR.'fixtures'.DIRECTORY_SEPARATOR.'image2.gif','file not created');
+		$this->assertFileExists($this->pubDir.DIRECTORY_SEPARATOR.'res'.DIRECTORY_SEPARATOR.'typo3conf'.DIRECTORY_SEPARATOR.'ext'.DIRECTORY_SEPARATOR.'staticpub'.DIRECTORY_SEPARATOR.'tests'.DIRECTORY_SEPARATOR.'fixtures'.DIRECTORY_SEPARATOR.'image3.gif','file not created');
+		$this->assertFileExists($this->pubDir.DIRECTORY_SEPARATOR.'res'.DIRECTORY_SEPARATOR.'typo3conf'.DIRECTORY_SEPARATOR.'ext'.DIRECTORY_SEPARATOR.'staticpub'.DIRECTORY_SEPARATOR.'tests'.DIRECTORY_SEPARATOR.'fixtures'.DIRECTORY_SEPARATOR.'image4.gif','file not created');
+	}
+	/**
 	 * clean up after test
 	 */
 	protected function tearDown(){

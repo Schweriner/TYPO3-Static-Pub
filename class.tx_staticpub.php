@@ -400,8 +400,11 @@ class tx_staticpub {
 	
 			# Resolve path for resources
 			foreach ( $resources as $index => $resource ) {
+				if(substr($resource,0,1)==='/'){
+					// fix absolutes paths
+					$resource = substr( $resource, 1 );
+				}
 				$resourceRoot = substr( $resource, 0, strpos($resource, '/') );
-				
 				if ( !in_array($resourceRoot, $resourceLocations) && strcmp('/', $resource{0}) ) {
 					$resources[$index] = t3lib_div::resolveBackPath( $path . $resource );
 				} else {
