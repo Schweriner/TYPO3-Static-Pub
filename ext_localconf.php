@@ -14,4 +14,13 @@ $GLOBALS['TYPO3_CONF_VARS']['EXTCONF']['crawler']['pollSuccess'][] = 'tx_staticp
 if (!isset($GLOBALS['TYPO3_CONF_VARS']['EXTCONF']['staticpub']['publishDir'])) {
  $GLOBALS['TYPO3_CONF_VARS']['EXTCONF']['staticpub']['publishDir'] = '_staticpub_';
 }
+
+if (TYPO3_MODE=='BE') {
+	$GLOBALS['TYPO3_CONF_VARS']['SC_OPTIONS']['scheduler']['tasks']['tx_staticpub_tasks_export'] = array(
+		'extension'        => 'staticpub',
+		'title'            => 'LLL:EXT:staticpub/locallang_db.php:staticpub_tasks_export.name',
+		'description'      => 'LLL:EXT:staticpub/locallang_db.php:staticpub_tasks_export.description',
+		'additionalFields' => 'tx_staticpub_tasks_export_AdditionalFieldProvider'
+	);
+}
 ?>

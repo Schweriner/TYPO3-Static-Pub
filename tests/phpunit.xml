@@ -1,0 +1,5 @@
+<phpunit>
+	<testsuite name="staticpub_tests">
+		<directory suffix="testcase.php">./</directory>
+	</testsuite>
+</phpunit>
