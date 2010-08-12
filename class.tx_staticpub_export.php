@@ -62,25 +62,57 @@ class tx_staticpub_export {
 	 */
 	private function synchroniseFolders(array $folders) {
 		foreach ( $folders as $source => $target ) {
+			$source = $this->getAbsolutePath ( $source );
+			$target = $this->getAbsolutePath  ( $target );
+			
 			if (FALSE === is_dir ( $source )) {
-				$source = PATH_site . $source;
-				if (FALSE === is_dir ( $source )) {
-					throw new Exception ( 'invalid source folder: ' . $source );
-				}
+				throw new Exception ( 'invalid source folder: ' . $source );
 			}
 			if (FALSE === is_dir ( $target )) {
-				$target = PATH_site . $target;
-				if (FALSE === is_dir ( $target )) {
-					throw new Exception ( 'invalid target folder: ' . $target );
-				}
+				$this->autoCreateTarget($source,$target);
 			}
-			if (FALSE === is_readable ( $source )) {
-				throw new Exception ( 'source not is_readable: ' . $source );
-			}
-			if (FALSE === is_writeable ( $target )) {
-				throw new Exception ( 'source not writable: ' . $target );
-			}
-			$this->sync ( realpath ( $source ), realpath ( $target ) );
+			
+			$this->checkPermission ( $source, $target );
+			$this->sync ( $source, $target );
+		}
+	}
+	/**
+	 * @param string $path
+	 */
+	private function getAbsolutePath($path){
+		if(substr($path,0,1) !== DIRECTORY_SEPARATOR){
+			$path = PATH_site . $path;
+			$path = realpath ( $path );
+		}
+		return $path;
+	}
+	/**
+	 * @param string $source
+	 * @param string $target
+	 */
+	private function autoCreateTarget($source,$target){
+		if(FALSE === mkdir($target,TRUE)){
+			throw new Exception ( 'could not ceate dir: ' . $target );
+		}
+		$perm = substr ( decoct ( fileperms ( $source ) ), 2 );
+		if (FALSE === @chmod ( $target, octdec ( $perm ) )) {
+			throw new Exception ( 'could not chmod file from: ' . $target . ' to ' . $perm );
+		}
+	}
+	/**
+	 * @param string $source
+	 * @param string $target
+	 * @throws Exception
+	 */
+	private function checkPermission($source, $target) {
+		if (FALSE === is_readable ( $source )) {
+			throw new Exception ( 'source not is_readable: ' . $source );
+		}
+		if (FALSE === is_writeable ( $target )) {
+			throw new Exception ( 'source not writable: ' . $target );
+		}
+		if (fileperms ( $source ) !== fileperms ( $target )) {
+			throw new Exception ( 'source (' . $source . ') and target (' . $target . ') do not have the same file permisons ' );
 		}
 	}
 	/**
@@ -102,9 +134,9 @@ class tx_staticpub_export {
 		$command .= ' ' . $sourceLocation;
 		$command .= ' ' . $targetLocation;
 		$command = escapeshellcmd ( $command );
-		t3lib_div::devLog($command, 'staticpub',1);
-		if (FALSE === system($command)) {
-			throw new RuntimeException ( 'Error on system command execution! Command:' . $command  );
+		t3lib_div::devLog ( $command, 'staticpub', 1 );
+		if (FALSE === system ( $command )) {
+			throw new RuntimeException ( 'Error on system command execution! Command:' . $command );
 		}
 	}
 }
