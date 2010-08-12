@@ -92,8 +92,7 @@ class tx_staticpub_export {
 	 * @throws RuntimeException
 	 */
 	private function sync($sourceLocation, $targetLocation) {
-		$options = '--force --omit-dir-times --ignore-errors --archive --partial --perms  --ignore-existing';
-		$command = 'rsync ' . $options;
+		$command = 'rsync --force --omit-dir-times --ignore-errors --archive --partial --perms  --delete';
 		if (substr ( $sourceLocation, - 1 ) != DIRECTORY_SEPARATOR) {
 			$sourceLocation .= DIRECTORY_SEPARATOR;
 		}
@@ -103,6 +102,7 @@ class tx_staticpub_export {
 		$command .= ' ' . $sourceLocation;
 		$command .= ' ' . $targetLocation;
 		$command = escapeshellcmd ( $command );
+		t3lib_div::devLog($command, 'staticpub',1);
 		if (FALSE === system($command)) {
 			throw new RuntimeException ( 'Error on system command execution! Command:' . $command  );
 		}
