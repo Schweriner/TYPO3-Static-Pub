@@ -90,7 +90,7 @@ class tx_staticpub_export {
 	 */
 	private function getRealPath($path){
 		if(FALSE === $realpath = realpath($path)){
-			throw new Exeption('invalid path: '.$path);
+			throw new Exception('invalid path: '.$path);
 		}
 		return $realpath;
 	}
