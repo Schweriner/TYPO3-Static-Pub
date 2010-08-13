@@ -62,7 +62,7 @@ class tx_staticpub_export {
 	 */
 	private function synchroniseFolders(array $folders) {
 		foreach ( $folders as $source => $target ) {
-			$source = $this->getAbsolutePath ( $source );
+			$source = $this->getRealPath($this->getAbsolutePath ( $source ));
 			$target = $this->getAbsolutePath  ( $target );
 			
 			if (FALSE === is_dir ( $source )) {
@@ -70,8 +70,8 @@ class tx_staticpub_export {
 			}
 			if (FALSE === is_dir ( $target )) {
 				$this->autoCreateTarget($source,$target);
+				$target = $this->getRealPath($target);
 			}
-			
 			$this->checkPermission ( $source, $target );
 			$this->sync ( $source, $target );
 		}
@@ -82,9 +82,17 @@ class tx_staticpub_export {
 	private function getAbsolutePath($path){
 		if(substr($path,0,1) !== DIRECTORY_SEPARATOR){
 			$path = PATH_site . $path;
-			$path = realpath ( $path );
 		}
 		return $path;
+	}
+	/**
+	 * @param string $path
+	 */
+	private function getRealPath($path){
+		if(FALSE === $realpath = realpath($path)){
+			throw new Exeption('invalid path: '.$path);
+		}
+		return $realpath;
 	}
 	/**
 	 * @param string $source
@@ -94,8 +102,8 @@ class tx_staticpub_export {
 		if(FALSE === mkdir($target,TRUE)){
 			throw new Exception ( 'could not ceate dir: ' . $target );
 		}
-		$perm = substr ( decoct ( fileperms ( $source ) ), 2 );
-		if (FALSE === @chmod ( $target, octdec ( $perm ) )) {
+		$perm = $this->getShortFilePerm( $source  );
+		if (FALSE === chmod ( $target, octdec ( $perm ) )) {
 			throw new Exception ( 'could not chmod file from: ' . $target . ' to ' . $perm );
 		}
 	}
@@ -111,7 +119,7 @@ class tx_staticpub_export {
 		if (FALSE === is_writeable ( $target )) {
 			throw new Exception ( 'source not writable: ' . $target );
 		}
-		if (fileperms ( $source ) !== fileperms ( $target )) {
+		if ($this->getShortFilePerm( $source )  !== $this->getShortFilePerm( $target )) {
 			throw new Exception ( 'source (' . $source . ') and target (' . $target . ') do not have the same file permisons ' );
 		}
 	}
@@ -139,6 +147,14 @@ class tx_staticpub_export {
 			throw new RuntimeException ( 'Error on system command execution! Command:' . $command );
 		}
 	}
+	/**
+	 * @param string $paths
+	 * @return string
+	 */
+	private function getShortFilePerm($paths){
+		return substr ( decoct ( fileperms ( $paths ) ), 2 );
+	}
+	
 }
 if (defined ( 'TYPO3_MODE' ) && $TYPO3_CONF_VARS [TYPO3_MODE] ['XCLASS'] ['ext/staticpub/class.tx_staticpub_export.php']) {
 	include_once ($TYPO3_CONF_VARS [TYPO3_MODE] ['XCLASS'] ['ext/staticpub/class.tx_staticpub_export.php']);
