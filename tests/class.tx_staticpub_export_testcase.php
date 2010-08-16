@@ -33,7 +33,8 @@ class tx_staticpub_export_testcase extends tx_phpunit_testcase {
 		$this->tx_staticpub_export = new tx_staticpub_export ();
 		$tempPath = realpath ( dirname ( __FILE__ ) . DIRECTORY_SEPARATOR . '..' . DIRECTORY_SEPARATOR . '..' . DIRECTORY_SEPARATOR . '..' . DIRECTORY_SEPARATOR . '..' . DIRECTORY_SEPARATOR . 'typo3temp' );
 		$this->pubDir = $tempPath . DIRECTORY_SEPARATOR . uniqid ( 'testPubDir' );
-		t3lib_div::mkdir ( $this->pubDir );
+		$source = dirname ( __FILE__ ) . DIRECTORY_SEPARATOR . 'fixtures' . DIRECTORY_SEPARATOR;
+		mkdir ( $this->pubDir ,$this->pubDir,substr ( decoct ( fileperms ( $source ) ), 2));
 	}
 	/**
 	 * test the method exportContent
@@ -54,17 +55,8 @@ class tx_staticpub_export_testcase extends tx_phpunit_testcase {
 	/**
 	 * test the method exportContent
 	 * @test
-	 * @expectedException Exception
-	 */
-	public function exportContentWithInvalidTargetFolder() {
-		$this->tx_staticpub_export->exportContent ( $this->pubDir . tx_staticpub_export::TARGET_SEPERATOR . 'sdsdds' . tx_staticpub_export::FOLDER_SEPERATOR );
-	}
-	/**
-	 * test the method exportContent
-	 * @test
 	 */
 	public function exportContent() {
-		
 		$source = dirname ( __FILE__ ) . DIRECTORY_SEPARATOR . 'fixtures' . DIRECTORY_SEPARATOR;
 		$this->tx_staticpub_export->exportContent ( $source . tx_staticpub_export::TARGET_SEPERATOR . $this->pubDir . tx_staticpub_export::FOLDER_SEPERATOR );
 		$this->assertFileExists ( $this->pubDir . DIRECTORY_SEPARATOR . 'welt.html', 'file not created' );
