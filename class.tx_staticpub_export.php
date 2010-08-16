@@ -142,7 +142,6 @@ class tx_staticpub_export {
 		$command .= ' ' . $sourceLocation;
 		$command .= ' ' . $targetLocation;
 		$command = escapeshellcmd ( $command );
-		t3lib_div::devLog ( $command, 'staticpub', 1 );
 		if (FALSE === system ( $command )) {
 			throw new RuntimeException ( 'Error on system command execution! Command:' . $command );
 		}

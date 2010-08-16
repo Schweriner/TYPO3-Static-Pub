@@ -621,12 +621,12 @@ class tx_staticpub {
 				if (!is_file($pubDir.$path.$fN) || (md5_file($pubDir.$path.$fN) != md5($content))) {
 					
 					// Overwrite file if it has changed or does not exist
-					t3lib_div::writeFile($pubDir.$path.$fN, $content);
-					
-					if (TYPO3_DLOG) t3lib_div::devLog(sprintf('File "%s" was  changed and written', $path.$fN), 'staticpuc', 0);
-					
-					$result = self::FILE_CHANGED; 
-					
+					if(FALSE !== t3lib_div::writeFile($pubDir.$path.$fN, $content)){
+						if (TYPO3_DLOG) t3lib_div::devLog(sprintf('File "%s" was  changed and written', $path.$fN), 'staticpuc', 0);
+						$result = self::FILE_CHANGED; 
+					}else{
+						$this->errorMsg = 'File "'.$pubDir.$path.$fN.'" could not be created.';
+					}
 				} else {
 					if (TYPO3_DLOG) t3lib_div::devLog(sprintf('File "%s" has not changed', $path.$fN), 'staticpuc', 0);
 
@@ -639,12 +639,13 @@ class tx_staticpub {
 				return $result;
 			} else {
 					// Write new file:
-				t3lib_div::writeFile($pubDir.$path.$fN, $content);
-
+				if(FALSE !== t3lib_div::writeFile($pubDir.$path.$fN, $content)){
 					// Create record for published file:
-				$this->createRecordForFile($path.$fN, $isResource?0:$page_id);
-
-				return self::FILE_CREATED;
+					$this->createRecordForFile($path.$fN, $isResource?0:$page_id);
+					return self::FILE_CREATED;
+				}else{
+					$this->errorMsg = 'File "'.$pubDir.$path.$fN.'" could not be created.';
+				}
 			}
 		} else {
 			$this->errorMsg = 'Path "'.$pubDir.$path.'" was not valid.';
