@@ -33,8 +33,7 @@ class tx_staticpub_export_testcase extends tx_phpunit_testcase {
 		$this->tx_staticpub_export = new tx_staticpub_export ();
 		$tempPath = realpath ( dirname ( __FILE__ ) . DIRECTORY_SEPARATOR . '..' . DIRECTORY_SEPARATOR . '..' . DIRECTORY_SEPARATOR . '..' . DIRECTORY_SEPARATOR . '..' . DIRECTORY_SEPARATOR . 'typo3temp' );
 		$this->pubDir = $tempPath . DIRECTORY_SEPARATOR . uniqid ( 'testPubDir' );
-		$source = dirname ( __FILE__ ) . DIRECTORY_SEPARATOR . 'fixtures' . DIRECTORY_SEPARATOR;
-		mkdir ( $this->pubDir ,$this->pubDir,substr ( decoct ( fileperms ( $source ) ), 2));
+		t3lib_div::mkdir ( $this->pubDir );
 	}
 	/**
 	 * test the method exportContent

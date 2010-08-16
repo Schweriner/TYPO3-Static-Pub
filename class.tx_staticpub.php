@@ -149,12 +149,12 @@ class tx_staticpub {
 			# Check for globally configured whitelist configuration
 			$extConf = $GLOBALS['TYPO3_CONF_VARS']["EXT"]["extConf"]['staticpub'];
 			$extConf = unserialize( $extConf );
-			
-			if ( array_key_exists('resourceWhitelist', $extConf) ) {
-				$resourceWhitelist = explode( ',', $extConf['resourceWhitelist'] );
+			if(is_array($extConf)){
+				if ( array_key_exists('resourceWhitelist', $extConf) ) {
+					$resourceWhitelist = explode( ',', $extConf['resourceWhitelist'] );
+				}
 			}
 		}
-		
 		if ( isset($resourceWhitelist) ) {
 			$resourceWhitelist = implode( ',', array_map('trim', $resourceWhitelist) );
 			

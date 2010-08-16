@@ -117,9 +117,9 @@ class tx_staticpub_export {
 			throw new Exception ( 'source not is_readable: ' . $source );
 		}
 		if (FALSE === is_writeable ( $target )) {
-			throw new Exception ( 'source not writable: ' . $target );
+			throw new Exception ( 'target not writable: ' . $target );
 		}
-		if ($this->getShortFilePerm( $source )  !== $this->getShortFilePerm( $target )) {
+		if ((int)$this->getShortFilePerm( $source )  > (int) $this->getShortFilePerm( $target )) {
 			throw new Exception ( 'source (' . $source . ') and target (' . $target . ') do not have the same file permisons ' );
 		}
 	}
