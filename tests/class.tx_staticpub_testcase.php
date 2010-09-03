@@ -51,6 +51,26 @@ class tx_staticpub_testcase extends tx_phpunit_testcase {
 		$this->assertFileExists($this->pubDir.DIRECTORY_SEPARATOR.$path.DIRECTORY_SEPARATOR.$file,'file not created');
 	}
 	/**
+	 * test the method createStaticFile
+	 * @test
+	 */
+	public function createStaticFileWithBasUrlFromUid(){
+		$this->tx_staticpub = $this->getMock('tx_staticpub',array('getUrlFromSysDomainUid'),array(),'',FALSE);
+		$this->tx_staticpub->expects($this->once())->method('getUrlFromSysDomainUid')->will($this->returnValue('http://www.test.de'));
+		$path = 'hallo/';
+		$file = 'welt.html';
+		$content = '<html><base href="http://www.integration.test.de/" /></html>';
+		$page_id = 0;
+		$pubDir = $this->pubDir.DIRECTORY_SEPARATOR;
+		$options = array();
+		$options['sys_domain_base_url'] = 0;
+		$this->assertNotNull($this->tx_staticpub->createStaticFile($path,$file,$content,$pubDir,$page_id,$options),'suscces message expected');
+		
+		$file = $this->pubDir.DIRECTORY_SEPARATOR.$path.DIRECTORY_SEPARATOR.$file;
+		$this->assertFileExists($file,'file not created');
+		$this->assertContains('http://www.test.de', file_get_contents($file) ,'file not created');
+	}
+	/**
 	 * test the method includeResources
 	 * @test
 	 */

@@ -186,27 +186,36 @@ class tx_staticpub {
 	/**
 	 * Writes content string to static filename in publishing directory
 	 *
-	 * @param	string		Path in which to publish file (relative to $pubDir)
-	 * @param	string		Filename (if blank, writes to "index.html")
-	 * @param	string		Content to write
-	 * @param	string		Absolute dir in which to publish the content
-	 * @param	integer		Page id
-	 * @param	array		Options. Key: includeResources=boolean; decides if resources are rendered or not.
-	 * @return	string		Success-message
+	 * @param	string	$path		Path in which to publish file (relative to $pubDir)
+	 * @param	string	$file		Filename (if blank, writes to "index.html")
+	 * @param	string	$content	Content to write
+	 * @param	string	$pubDir		Absolute dir in which to publish the content
+	 * @param	integer	$page_id	Page id
+	 * @param	array	$options	Options. Key: includeResources=boolean; decides if resources are rendered or not.
+	 * @return	string				Success-message
 	 */
-	function createStaticFile($path,$file,$content,$pubDir,$page_id,$options=array()) {
+	public function createStaticFile($path,$file,$content,$pubDir,$page_id,$options=array()) {
 
 		# Fix base URL:
-		if ( isset($options['overruleBaseUrl']) )	{
+		if ( isset($options['overruleBaseUrl']))	{
 			$htmlparser = t3lib_div::makeInstance( 't3lib_parsehtml' );
 			$parts = $htmlparser->splitTags( 'base', $content, 1 );
-			
+		
 			if ( isset($parts[1]) ) {
 				$parts[1] = !$options['overruleBaseUrl'] ? '' : '<base href="'.htmlspecialchars($options['overruleBaseUrl']).'" />';
 				$content = implode( '', $parts );
 			}
 		}
-
+		# Fix base URL with uid:
+		if (isset($options['sys_domain_base_url']))	{
+			$htmlparser = t3lib_div::makeInstance( 't3lib_parsehtml' );
+			$parts = $htmlparser->splitTags( 'base', $content, 1 );
+			$url = $this->getUrlFromSysDomainUid($options['sys_domain_base_url']);
+			if ( isset($parts[1]) ) {
+				$parts[1] = !$url ? '' : '<base href="'.htmlspecialchars($url).'" />';
+				$content = implode( '', $parts );
+			}
+		}
 		# Find relative path prefix for file:
 		if ( $options['includeResources'] === 'relPath' ) {
 			$prefixN = count( explode('/', $path) ) - 1;
@@ -309,7 +318,28 @@ class tx_staticpub {
 		$result = $this->createFile( $path, $file, $content, $pubDir, $page_id );
 		return $result;
 	}
-	
+	/**
+	 * @param integer $uid
+	 * @return string url
+	 * @throws Exception
+	 */
+	protected function getUrlFromSysDomainUid($uid){
+		$uid = intval($uid);
+		if ($uid > 0) {
+			$res = $GLOBALS['TYPO3_DB']->exec_SELECTquery(
+				'*',
+				'sys_domain',
+				'uid = '.$uid .
+				t3lib_BEfunc::BEenableFields('sys_domain') .
+				t3lib_BEfunc::deleteClause('sys_domain')
+			);
+			$row = $GLOBALS['TYPO3_DB']->sql_fetch_assoc($res);
+			if ($row['domainName'] != '') {
+				return 'http://'.$row['domainName'];
+			}
+		}
+		throw new Exception('could not find url from uid: '.$uid);
+	}
 	/**
 	 * Copies resource files to configured publishing folder.
 	 *
