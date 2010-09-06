@@ -9,4 +9,4 @@ CREATE TABLE tx_staticpub_pages (
 
   PRIMARY KEY (filepath_hash),
   KEY page_id (page_id)
-);
+) ENGINE=InnoDB;
