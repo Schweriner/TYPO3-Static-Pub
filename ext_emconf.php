@@ -1,13 +1,13 @@
 <?php
 
 ########################################################################
-# Extension Manager/Repository config file for ext: "staticpub"
+# Extension Manager/Repository config file for ext "staticpub".
 #
-# Auto generated 24-07-2008 14:12
+# Auto generated 06-09-2010 17:05
 #
 # Manual updates:
-# Only the data in the array - anything else is removed by next write.
-# "version" and "dependencies" must not be touched!
+# Only the data in the array - everything else is removed by next
+# writing. "version" and "dependencies" must not be touched!
 ########################################################################
 
 $EM_CONF[$_EXTKEY] = array(
@@ -15,7 +15,7 @@ $EM_CONF[$_EXTKEY] = array(
 	'description' => 'Allows pages to be staticly published as real HTML pages.',
 	'category' => 'module',
 	'shy' => 0,
-	'version' => '1.2.10',
+	'version' => '1.2.11',
 	'dependencies' => '',
 	'conflicts' => '',
 	'priority' => '',
@@ -40,7 +40,7 @@ $EM_CONF[$_EXTKEY] = array(
 		'suggests' => array(
 		),
 	),
-	'_md5_values_when_last_written' => 'a:12:{s:22:"class.tx_staticpub.php";s:4:"52cc";s:25:"class.tx_staticpub_fe.php";s:4:"1634";s:12:"ext_icon.gif";s:4:"4037";s:17:"ext_localconf.php";s:4:"8b2c";s:14:"ext_tables.php";s:4:"b804";s:14:"ext_tables.sql";s:4:"c98e";s:16:"locallang_db.php";s:4:"2e25";s:12:"doc/TODO.txt";s:4:"ea82";s:14:"doc/manual.sxw";s:4:"05e1";s:19:"doc/manuelnotes.txt";s:4:"675b";s:40:"modfunc1/class.tx_staticpub_modfunc1.php";s:4:"5489";s:22:"modfunc1/locallang.php";s:4:"6aed";}',
+	'_md5_values_when_last_written' => 'a:27:{s:22:"class.tx_staticpub.php";s:4:"1da8";s:29:"class.tx_staticpub_export.php";s:4:"4c07";s:25:"class.tx_staticpub_fe.php";s:4:"5da5";s:16:"ext_autoload.php";s:4:"c692";s:21:"ext_conf_template.txt";s:4:"c3ea";s:12:"ext_icon.gif";s:4:"4037";s:17:"ext_localconf.php";s:4:"a360";s:14:"ext_tables.php";s:4:"b804";s:14:"ext_tables.sql";s:4:"e2eb";s:16:"locallang_db.php";s:4:"cc09";s:12:"doc/TODO.txt";s:4:"ea82";s:14:"doc/manual.sxw";s:4:"9b14";s:19:"doc/manuelnotes.txt";s:4:"675b";s:40:"modfunc1/class.tx_staticpub_modfunc1.php";s:4:"4e99";s:22:"modfunc1/locallang.php";s:4:"6aed";s:41:"tasks/class.tx_staticpub_tasks_export.php";s:4:"651a";s:65:"tasks/class.tx_staticpub_tasks_export_AdditionalFieldProvider.php";s:4:"58a9";s:44:"tests/class.tx_staticpub_export_testcase.php";s:4:"45c0";s:37:"tests/class.tx_staticpub_testcase.php";s:4:"6760";s:17:"tests/phpunit.xml";s:4:"d513";s:25:"tests/fixtures/image1.gif";s:4:"4037";s:25:"tests/fixtures/image2.gif";s:4:"4037";s:25:"tests/fixtures/image3.gif";s:4:"4037";s:25:"tests/fixtures/image4.gif";s:4:"4037";s:23:"tests/fixtures/test.css";s:4:"d6d9";s:24:"tests/fixtures/welt.html";s:4:"b266";s:32:"tests/fixtures/welt_mit_css.html";s:4:"e46b";}',
 	'suggests' => array(
 	),
 );
