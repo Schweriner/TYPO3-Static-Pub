@@ -52,9 +52,9 @@ require_once(t3lib_extMgm::extPath('staticpub').'class.tx_staticpub.php');
  * Publishing of TYPO3 pages as static HTML must happen via the frontend since that is where the page is rendered into its final form
  * The publishing actions is activated ONLY during a request where the extension "crawler" is requesting the page with the "tx_staticpub_publish" processing instruction.
  *
- * @author	Kasper Skaarhoj <kasper@typo3.com>
  * @package TYPO3
  * @subpackage tx_staticpub
+ * @author	Kasper Skaarhoj <kasper@typo3.com>
  */
 class tx_staticpub_fe extends tx_staticpub {
 
@@ -62,8 +62,8 @@ class tx_staticpub_fe extends tx_staticpub {
 	 * Bypasses cache-acquisition of page if the page should be staticly published (otherwise the publishing hook is not activated...)
 	 * (Hook-function called from TSFE, see ext_localconf.php for configuration)
 	 *
-	 * @param	array		Parameters from frontend
-	 * @param	object		TSFE object (reference under PHP5)
+	 * @param	array	&$params Parameters from frontend
+	 * @param	object	$ref SFE object (reference under PHP5)
 	 * @return	void
 	 */
 	function fe_headerNoCache(&$params, $ref)	{
@@ -82,8 +82,8 @@ class tx_staticpub_fe extends tx_staticpub {
 	 * Publishes the current page as static HTML file if possible (depends on configuration and other circumstances)
 	 * (Hook-function called from TSFE, see ext_localconf.php for configuration)
 	 *
-	 * @param	tslib_fe	Reference to parent object (TSFE)
-	 * @param	integer		[Not used here]
+	 * @param	tslib_fe	$pObj Reference to parent object (TSFE)
+	 * @param	integer		$timeOutTime [Not used here]
 	 * @return	void
 	 */
 	function insertPageIncache(tslib_fe $pObj, $timeOutTime)	{
@@ -159,18 +159,14 @@ class tx_staticpub_fe extends tx_staticpub {
 			$pObj->applicationData['tx_crawler']['log']['tx_staticpub'] = 'EXT:static_pub; ERROR: crawler is not loaded';
 		} elseif(!$pObj->applicationData['tx_crawler']['running']) {
 			$pObj->applicationData['tx_crawler']['log']['tx_staticpub'] = 'EXT:static_pub; ERROR: crawler is not running';
-		} elseif(!in_array('tx_staticpub_publish', $pObj->applicationData['tx_crawler']['parameters']['procInstructions'])) {
-			$pObj->applicationData['tx_crawler']['log']['tx_staticpub'] = 'EXT:static_pub; ERROR: no procInstructions given';
-			$pObj->applicationData['tx_crawler']['success']['tx_staticpub'] = true;
 		}
-
 		$GLOBALS['TT']->pull();
 	}
 
 	/**
 	 * Create url for this page
 	 *
-	 * @param void
+	 * @param tslib_fe $pObj
 	 * @return string url
 	 */
 	function createUrl(tslib_fe $pObj) {
@@ -191,7 +187,7 @@ class tx_staticpub_fe extends tx_staticpub {
 	 * Check whether there're parts within the query
 	 * which aren't related to a possible workspace-publish
 	 * 
-	 * @param $str	the query-string
+	 * @param string $str	the query-string
 	 * @return boolean
 	 */
 	function hasInvalidQueryparts($str) {
@@ -212,4 +208,3 @@ class tx_staticpub_fe extends tx_staticpub {
 if (defined('TYPO3_MODE') && $TYPO3_CONF_VARS[TYPO3_MODE]['XCLASS']['ext/staticpub/class.tx_staticpub_fe.php'])	{
 	include_once($TYPO3_CONF_VARS[TYPO3_MODE]['XCLASS']['ext/staticpub/class.tx_staticpub_fe.php']);
 }
-?>

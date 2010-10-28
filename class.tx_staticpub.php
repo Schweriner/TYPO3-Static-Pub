@@ -65,9 +65,9 @@
 /**
  * Static publishing extension, base class
  *
- * @author	Kasper Skaarhoj <kasper@typo3.com>
  * @package TYPO3
  * @subpackage tx_staticpub
+ * @author	Kasper Skaarhoj <kasper@typo3.com>
  */
 class tx_staticpub {
 
@@ -386,7 +386,7 @@ class tx_staticpub {
 	/**
 	 * Creates and returns a message for a file creation state.
 	 *
-	 * @param $state
+	 * @param string $state
 	 * @return string
 	 */
 	protected function getMessageForState($state){
@@ -559,7 +559,6 @@ class tx_staticpub {
 	 * Resolves static path for given file using provided configuration. 
 	 *
 	 * @param  string $file  File name.
-	 * @param  string $path  Relative (w.r.t TYPO3 root) file path.
 	 * @param  array  $conf  Staticpub crawler configuration.
 	 * @return string        Static path string.
 	 * @author Chetan Thapliyal <chetan.thapliyal@aoemedia.de>
@@ -612,12 +611,12 @@ class tx_staticpub {
 	/**
 	 * Writes content string to static filename in publishing directory
 	 *
-	 * @param	string		Path in which to publish file (relative to $pubDir)
-	 * @param	string		Filename (if blank, writes to "index.html")
-	 * @param	string		Content to write
-	 * @param	string		Absolute dir in which to publish the content
-	 * @param	integer		Page id
-	 * @param	boolean		Is resource
+	 * @param	string		$path Path in which to publish file (relative to $pubDir)
+	 * @param	string		$file Filename (if blank, writes to "index.html")
+	 * @param	string		$content Content to write
+	 * @param	string		$pubDir Absolute dir in which to publish the content
+	 * @param	integer		$page_id Page id
+	 * @param	boolean		$isResource Is resource
 	 * @return	string		Success-message
 	 */
 	function createFile($path,$file,$content,$pubDir,$page_id,$isResource=FALSE)	{
@@ -685,8 +684,8 @@ class tx_staticpub {
 	/**
 	 * Create path in publishing directory
 	 *
-	 * @param	string		Path to create
-	 * @param	string		Absolute publishing directory
+	 * @param	string		$path Path to create
+	 * @param	string		$pubDir Absolute publishing directory
 	 * @return	boolean		Returns false on success, otherwise error message
 	 */
 	function createPath($path,$pubDir)	{
@@ -715,9 +714,9 @@ class tx_staticpub {
 	 * Creates or updates the record for a written file.
 	 * All published files have a record 1-1
 	 *
-	 * @param	string		Filepath (primary key for record in hashed form)
-	 * @param	integer		Page ID where the file belongs
-	 * @param	boolean		If set, an EXISTING record is updated instead of creating a new. This flag MUST be set based on an actual test if a record already exists!
+	 * @param	string		$filepath Filepath (primary key for record in hashed form)
+	 * @param	integer		$page_id Page ID where the file belongs
+	 * @param	boolean		$update If set, an EXISTING record is updated instead of creating a new. This flag MUST be set based on an actual test if a record already exists!
 	 * @return	void
 	 */
 	function createRecordForFile($filepath, $page_id, $update=FALSE)	{
@@ -757,7 +756,7 @@ class tx_staticpub {
 	/**
 	 * Remove file ID from filesystem and database registration
 	 *
-	 * @param	integer		File registration ID (hash of filepath)
+	 * @param	integer		$filepath_hash File registration ID (hash of filepath)
 	 * @return	string		False if OK, otherwise error string
 	 */
 	function remove_fileId($filepath_hash)	{
@@ -790,7 +789,7 @@ class tx_staticpub {
 	/**
 	 * Removes all files registered for a certain page ID
 	 *
-	 * @param	integer		Page ID
+	 * @param	integer		$page_id Page ID
 	 * @return	string		False if OK, otherwise error string
 	 */
 	function remove_filesFromPageId($page_id)	{
@@ -805,7 +804,7 @@ class tx_staticpub {
 	 * Removes a single file from the file systems publishing directory
 	 * Removes directories also if empty
 	 *
-	 * @param	string		File path, relative to publishing directory
+	 * @param	string		$filePath File path, relative to publishing directory
 	 * @return	string		False if OK, otherwise error string
 	 */
 	function removeFile($filePath)	{
@@ -833,8 +832,8 @@ class tx_staticpub {
 	/**
 	 * Remove directory recursively backwards until not possible anymore.
 	 *
-	 * @param	string		Filename / Directory name
-	 * @param	string		Publishing directory (makes sure deletion doesn't happend all the way down...)
+	 * @param	string		$file Filename / Directory name
+	 * @param	string		$pubDir Publishing directory (makes sure deletion doesn't happend all the way down...)
 	 * @return	void
 	 */
 	function removeDirRecursively($file, $pubDir)	{
@@ -849,8 +848,8 @@ class tx_staticpub {
 	/**
 	 * Integrity check of a file/directory before being unlinked/removed. This is making sure the path is valid, absolute path and within the publishing directory!
 	 *
-	 * @param	string		File/Directory to delete!
-	 * @param	string		Publishing directory
+	 * @param	string		$fileOrDirToDelete File/Directory to delete!
+	 * @param	string		$pubDir Publishing directory
 	 * @return	boolean		Returns TRUE if OK, otherwise it DIES! (because it really shouldn't fail! You should have checked it all on beforehand! This is only an emergency brake against your bad coding...)
 	 */
 	function finalIntegrityCheck($fileOrDirToDelete, $pubDir)	{
@@ -876,7 +875,7 @@ class tx_staticpub {
 	/**
 	 * Returns record for a file, if any
 	 *
-	 * @param	string		Filepath relative to publishing directory
+	 * @param	string		$filepath Filepath relative to publishing directory
 	 * @return	array		Returns array IF there was a record.
 	 */
 	function getRecordForFile($filepath)	{
@@ -891,7 +890,7 @@ class tx_staticpub {
 	/**
 	 * Returns records for a page id
 	 *
-	 * @param	integer		Page id
+	 * @param	integer		$page_id Page id
 	 * @return	array		Array of records
 	 */
 	function getRecordForPageID($page_id)	{
@@ -937,4 +936,3 @@ class tx_staticpub {
 if (defined('TYPO3_MODE') && $TYPO3_CONF_VARS[TYPO3_MODE]['XCLASS']['ext/staticpub/class.tx_staticpub.php'])	{
 	include_once($TYPO3_CONF_VARS[TYPO3_MODE]['XCLASS']['ext/staticpub/class.tx_staticpub.php']);
 }
-?>

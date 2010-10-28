@@ -51,9 +51,9 @@ require_once(t3lib_extMgm::extPath('staticpub').'class.tx_staticpub.php');
 /**
  * Static publishing extension
  *
- * @author	Kasper Skaarhoj <kasperYYYY@typo3.com>
  * @package TYPO3
  * @subpackage tx_staticpub
+ * @author	Kasper Skaarhoj <kasperYYYY@typo3.com>
  */
 class tx_staticpub_modfunc1 extends t3lib_extobjbase {
 
@@ -131,7 +131,7 @@ class tx_staticpub_modfunc1 extends t3lib_extobjbase {
 	/**
 	 * Rendering the information
 	 *
-	 * @param	array		The Page tree data
+	 * @param	array		$tree The Page tree data
 	 * @return	string		HTML for the information table.
 	 */
 	function renderModule($tree)	{
@@ -231,4 +231,3 @@ class tx_staticpub_modfunc1 extends t3lib_extobjbase {
 if (defined('TYPO3_MODE') && $TYPO3_CONF_VARS[TYPO3_MODE]['XCLASS']['ext/staticpub/modfunc1/class.tx_staticpub_modfunc1.php'])	{
 	include_once($TYPO3_CONF_VARS[TYPO3_MODE]['XCLASS']['ext/staticpub/modfunc1/class.tx_staticpub_modfunc1.php']);
 }
-?>
