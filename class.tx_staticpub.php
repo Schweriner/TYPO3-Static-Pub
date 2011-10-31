@@ -928,6 +928,7 @@ class tx_staticpub {
 			if (FALSE === mkdir($pubDirAbs, octdec($GLOBALS['TYPO3_CONF_VARS']['BE']['folderCreateMask']),TRUE)){
 				return FALSE;
 			}
+			t3lib_div::fixPermissions($pubDirAbs);
 		}
 		return TRUE;
 	}
