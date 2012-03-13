@@ -116,8 +116,8 @@ class tx_staticpub_fe extends tx_staticpub {
 
 						if (!$this->hasInvalidQueryparts($uParts['query']))	{
 
-								// check if the file extension is empty, "html" or "htm"
-							if (!strcmp($fI['fileext'],'') || t3lib_div::inList('html,htm',$fI['fileext']))	{
+								// check if the file extension is empty, "html" or "htm" or "txt" (for robots.txt)
+							if (!strcmp($fI['fileext'],'') || t3lib_div::inList('html,htm,txt',$fI['fileext']))	{
 
 									// create file
 								$tsConfig = $pObj->applicationData['tx_crawler']['parameters']['procInstrParams']['tx_staticpub_publish.'];									
