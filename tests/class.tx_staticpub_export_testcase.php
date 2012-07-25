@@ -38,7 +38,7 @@ class tx_staticpub_export_testcase extends tx_phpunit_testcase {
 	/**
 	 * test the method exportContent
 	 * @test
-	 * @expectedException Exception
+	 * @expectedException RuntimeException
 	 */
 	public function exportContentWithEmptyFolders() {
 		$this->tx_staticpub_export->exportContent ( '' );
@@ -46,7 +46,7 @@ class tx_staticpub_export_testcase extends tx_phpunit_testcase {
 	/**
 	 * test the method exportContent
 	 * @test
-	 * @expectedException Exception
+	 * @expectedException RuntimeException
 	 */
 	public function exportContentWithInvalidSourceFolder() {
 		$this->tx_staticpub_export->exportContent ( 'aassadad' . tx_staticpub_export::TARGET_SEPERATOR . 'sdsdds' . tx_staticpub_export::FOLDER_SEPERATOR );

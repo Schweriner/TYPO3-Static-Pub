@@ -33,12 +33,12 @@ class tx_staticpub_export {
 	const TARGET_SEPERATOR = ':';
 	/**
 	 * @param string $str_folders
-	 * @throws Exception
+	 * @throws RuntimeException
 	 */
 	public function exportContent($str_folders) {
 		$folders = $this->parseFolders ( $str_folders );
 		if (empty ( $folders )) {
-			throw new Exception ( 'tx_staticpub_export: invalid folders: ' . $str_folders );
+			throw new RuntimeException ( 'tx_staticpub_export: invalid folders: ' . $str_folders );
 		}
 		$this->synchroniseFolders ( $folders );
 	}
@@ -58,7 +58,7 @@ class tx_staticpub_export {
 	}
 	/**
 	 * @param array $folders
-	 * @throws Exception
+	 * @throws RuntimeException
 	 */
 	private function synchroniseFolders(array $folders) {
 		foreach ( $folders as $source => $target ) {
@@ -66,7 +66,7 @@ class tx_staticpub_export {
 			$target = $this->getAbsolutePath  ( $target );
 			
 			if (FALSE === is_dir ( $source )) {
-				throw new Exception ( 'invalid source folder: ' . $source );
+				throw new RuntimeException ( 'invalid source folder: ' . $source );
 			}
 			if (FALSE === is_dir ( $target )) {
 				$this->autoCreateTarget($source,$target);
@@ -90,7 +90,7 @@ class tx_staticpub_export {
 	 */
 	private function getRealPath($path){
 		if(FALSE === $realpath = realpath($path)){
-			throw new Exception('invalid path: '.$path);
+			throw new RuntimeException('invalid path: '.$path);
 		}
 		return $realpath;
 	}
@@ -100,27 +100,27 @@ class tx_staticpub_export {
 	 */
 	private function autoCreateTarget($source,$target){
 		if(FALSE === mkdir($target,TRUE)){
-			throw new Exception ( 'could not ceate dir: ' . $target );
+			throw new RuntimeException ( 'could not ceate dir: ' . $target );
 		}
 		$perm = $this->getShortFilePerm( $source  );
 		if (FALSE === chmod ( $target, octdec ( $perm ) )) {
-			throw new Exception ( 'could not chmod file from: ' . $target . ' to ' . $perm );
+			throw new RuntimeException ( 'could not chmod file from: ' . $target . ' to ' . $perm );
 		}
 	}
 	/**
 	 * @param string $source
 	 * @param string $target
-	 * @throws Exception
+	 * @throws RuntimeException
 	 */
 	private function checkPermission($source, $target) {
 		if (FALSE === is_readable ( $source )) {
-			throw new Exception ( 'source not is_readable: ' . $source );
+			throw new RuntimeException ( 'source not is_readable: ' . $source );
 		}
 		if (FALSE === is_writeable ( $target )) {
-			throw new Exception ( 'target not writable: ' . $target );
+			throw new RuntimeException ( 'target not writable: ' . $target );
 		}
 		if ((int)$this->getShortFilePerm( $source )  > (int) $this->getShortFilePerm( $target )) {
-			throw new Exception ( 'source (' . $source . ') and target (' . $target . ') do not have the same file permisons ' );
+			throw new RuntimeException ( 'source (' . $source . ') and target (' . $target . ') do not have the same file permisons ' );
 		}
 	}
 	/**
@@ -129,7 +129,7 @@ class tx_staticpub_export {
 	 * @param string $sourceLocation
 	 * @param string $targetLocation
 	 * @return string rsync command
-	 * @throws RuntimeException
+	 * @throws RuntimeRuntimeException
 	 */
 	private function sync($sourceLocation, $targetLocation) {
 		$command = 'rsync --force --omit-dir-times --ignore-errors --archive --partial --perms  --delete';
