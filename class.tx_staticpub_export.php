@@ -64,7 +64,7 @@ class tx_staticpub_export {
 		foreach ( $folders as $source => $target ) {
 			$source = $this->getRealPath($this->getAbsolutePath ( $source ));
 			$target = $this->getAbsolutePath  ( $target );
-			
+
 			if (FALSE === is_dir ( $source )) {
 				throw new RuntimeException ( 'invalid source folder: ' . $source );
 			}
@@ -99,7 +99,7 @@ class tx_staticpub_export {
 	 * @param string $target
 	 */
 	private function autoCreateTarget($source,$target){
-		if(FALSE === mkdir($target,TRUE)){
+		if(FALSE === mkdir($target, 0775, TRUE)){
 			throw new RuntimeException ( 'could not ceate dir: ' . $target );
 		}
 		$perm = $this->getShortFilePerm( $source  );
@@ -153,7 +153,7 @@ class tx_staticpub_export {
 	private function getShortFilePerm($paths){
 		return substr ( decoct ( fileperms ( $paths ) ), 2 );
 	}
-	
+
 }
 if (defined ( 'TYPO3_MODE' ) && $TYPO3_CONF_VARS [TYPO3_MODE] ['XCLASS'] ['ext/staticpub/class.tx_staticpub_export.php']) {
 	include_once ($TYPO3_CONF_VARS [TYPO3_MODE] ['XCLASS'] ['ext/staticpub/class.tx_staticpub_export.php']);
