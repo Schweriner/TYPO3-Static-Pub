@@ -253,11 +253,11 @@ class tx_staticpub {
 
 					if ( !strcmp('CSS', $resourceType) ) {
 						$fileInfo = pathinfo( $resource );
-						$file = PATH_site . $fileInfo['dirname'] . '/' . $fileInfo['basename'];
-                        if(FALSE == file_exists($file)) {
+						$resourceFile = PATH_site . $fileInfo['dirname'] . '/' . $fileInfo['basename'];
+                        if(FALSE == file_exists($resourceFile)) {
                             return;
                         }
-                        $fileContent = file_get_contents( $file );
+                        $fileContent = file_get_contents( $resourceFile );
 						$moreResources = $this->extractResources( $fileContent, $fileInfo['dirname'] . '/', true );
 						$additionalResources = array_merge( $additionalResources, $moreResources );
 					}
@@ -316,7 +316,6 @@ class tx_staticpub {
 
 		# Check for file prefix
 	    $path = $this->getResourcePrefix($file, $options) . ltrim($path, '/');
-
 
 		# Write file:
 		$result = $this->createFile( $path, $file, $content, $pubDir, $page_id );
@@ -625,6 +624,8 @@ class tx_staticpub {
 	 */
 	function createFile($path,$file,$content,$pubDir,$page_id,$isResource=FALSE)	{
 		$this->errorMsg = '';
+
+
 
 			// If there is a path prefix then create the path if not created already...:
 		if (!@is_dir($pubDir.$path) && strcmp($path,'') && $path!='/')	{
