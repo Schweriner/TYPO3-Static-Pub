@@ -15,7 +15,7 @@ $EM_CONF[$_EXTKEY] = array(
 	'description' => 'Allows pages to be staticly published as real HTML pages.',
 	'category' => 'module',
 	'shy' => 0,
-	'version' => '1.2.19',
+	'version' => '1.3.0',
 	'dependencies' => '',
 	'conflicts' => '',
 	'priority' => '',
@@ -27,13 +27,14 @@ $EM_CONF[$_EXTKEY] = array(
 	'modify_tables' => '',
 	'clearcacheonload' => 0,
 	'lockType' => '',
-	'author' => 'Kasper Skaarhoj, Daniel Pötzinger-AOE media',
+	'author' => 'Kasper Skaarhoj, Daniel Pötzinger-AOE GmbH',
 	'author_email' => 'kasper@typo3.com',
 	'author_company' => '',
 	'CGLcompliance' => '',
 	'CGLcompliance_note' => '',
 	'constraints' => array(
 		'depends' => array(
+	       'typo3' => '6.0.0',
 		),
 		'conflicts' => array(
 		),

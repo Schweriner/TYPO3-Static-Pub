@@ -43,10 +43,6 @@
  *
  */
 
-require_once(PATH_t3lib.'class.t3lib_pagetree.php');
-require_once(PATH_t3lib.'class.t3lib_extobjbase.php');
-require_once(t3lib_extMgm::extPath('staticpub').'class.tx_staticpub.php');
-
 
 /**
  * Static publishing extension

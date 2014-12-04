@@ -842,7 +842,7 @@ class tx_staticpub {
 	 * @return	void
 	 */
 	function removeDirRecursively($file, $pubDir)	{
-		$fileDir = ereg_replace('\/[^\/]*$','',$file);
+		$fileDir = preg_replace('/\/[^\/]*$/','',$file);
 		if (@is_dir($fileDir) && t3lib_div::isFirstPartOfStr($fileDir, $pubDir) && $this->finalIntegrityCheck($fileDir, $pubDir))	{
 			if (@rmdir($fileDir))	{
 				$this->removeDirRecursively($fileDir, $pubDir);
