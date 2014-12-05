@@ -21,7 +21,7 @@
  *
  *  This copyright notice MUST APPEAR in all copies of the script!
  ***************************************************************/
-require_once(t3lib_extMgm::extPath('staticpub') . 'class.tx_staticpub_export.php');
+
 /**
  * sheduler task to export static pages
  * @package TYPO3

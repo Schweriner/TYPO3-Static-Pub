@@ -42,11 +42,6 @@
  *
  */
 
-
-
-
-require_once(t3lib_extMgm::extPath('staticpub').'class.tx_staticpub.php');
-
 /**
  * Static publishing, frontend hook
  * Publishing of TYPO3 pages as static HTML must happen via the frontend since that is where the page is rendered into its final form
@@ -120,18 +115,18 @@ class tx_staticpub_fe extends tx_staticpub {
 							if (!strcmp($fI['fileext'],'') || t3lib_div::inList('html,htm,txt',$fI['fileext']))	{
 
 									// create file
-								$tsConfig = $pObj->applicationData['tx_crawler']['parameters']['procInstrParams']['tx_staticpub_publish.'];									
+								$tsConfig = $pObj->applicationData['tx_crawler']['parameters']['procInstrParams']['tx_staticpub_publish.'];
 								$res = $this->createStaticFile($fI['path'], $fI['file'], $pObj->content, $pubDir, $origId, $tsConfig);
 
 									// check if the file has been created successfully
 								if ($res) {
 									$publishPath 	= substr($pubDir,strlen(PATH_site));
-									
-									$pObj->applicationData['tx_crawler']['log']['tx_staticpub_resourceprefix'] 	= $this->getResourcePrefix($fI['file'], $tsConfig);		
-									$pObj->applicationData['tx_crawler']['log']['tx_staticpub_path']		 	= $uParts['path'];	
+
+									$pObj->applicationData['tx_crawler']['log']['tx_staticpub_resourceprefix'] 	= $this->getResourcePrefix($fI['file'], $tsConfig);
+									$pObj->applicationData['tx_crawler']['log']['tx_staticpub_path']		 	= $uParts['path'];
 									$pObj->applicationData['tx_crawler']['log']['tx_staticpub_publishdir'] 		= $publishPath;
 									$pObj->applicationData['tx_crawler']['log']['tx_staticpub_state'] 			= $res;
-					
+
 									$pObj->applicationData['tx_crawler']['log']['tx_staticpub'] = 'EXT:static_pub; OK: "'.$uParts['path'].'" published in "'.$publishPath.'". Msg: '.$this->getMessageForState($res);
 									$pObj->applicationData['tx_crawler']['success']['tx_staticpub'] = true;
 									$fileCreated = true;
@@ -141,11 +136,11 @@ class tx_staticpub_fe extends tx_staticpub {
 					} else $pObj->applicationData['tx_crawler']['log']['tx_staticpub'] = 'EXT:static_pub; ERROR: GET var ID ("'.$origId.'") did not match TSFE->id ("'.$pObj->id.'")!';
 				} else $pObj->applicationData['tx_crawler']['log']['tx_staticpub'] = 'EXT:static_pub; ERROR: No publishing directory was configured.';
 			} else $pObj->applicationData['tx_crawler']['log']['tx_staticpub'] = 'EXT:static_pub; ERROR: isStaticCacheble = NO';
-			
+
 			if($this->errorMsg) {
-				$pObj->applicationData['tx_crawler']['log'][] = $this->errorMsg; 
+				$pObj->applicationData['tx_crawler']['log'][] = $this->errorMsg;
 			}
-			
+
 				// if no file was created check if an existing file from a previous run should be deleted
 			if (!$fileCreated) {
 				$pageTSconfig = t3lib_BEfunc::getPagesTSconfig($origId);
@@ -186,7 +181,7 @@ class tx_staticpub_fe extends tx_staticpub {
 	/**
 	 * Check whether there're parts within the query
 	 * which aren't related to a possible workspace-publish
-	 * 
+	 *
 	 * @param string $str	the query-string
 	 * @return boolean
 	 */
@@ -201,7 +196,7 @@ class tx_staticpub_fe extends tx_staticpub {
 		}
 		return false;
 	}
-	
+
 }
 
 
