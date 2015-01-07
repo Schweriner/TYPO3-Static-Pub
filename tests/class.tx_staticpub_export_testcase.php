@@ -28,12 +28,14 @@ class tx_staticpub_export_testcase extends tx_phpunit_testcase {
 	private $pubDir;
 	/**
 	 * prepare the test
+	 *
+	 * no need to mkdir on $this->pubDir because staticpub
+	 * will create this folder by its own in tx_staticpub_export::autoCreateTarget
 	 */
 	protected function setUp() {
 		$this->tx_staticpub_export = new tx_staticpub_export ();
 		$tempPath = realpath ( dirname ( __FILE__ ) . DIRECTORY_SEPARATOR . '..' . DIRECTORY_SEPARATOR . '..' . DIRECTORY_SEPARATOR . '..' . DIRECTORY_SEPARATOR . '..' . DIRECTORY_SEPARATOR . 'typo3temp' );
 		$this->pubDir = $tempPath . DIRECTORY_SEPARATOR . uniqid ( 'testPubDir' );
-		t3lib_div::mkdir ( $this->pubDir );
 	}
 	/**
 	 * test the method exportContent
