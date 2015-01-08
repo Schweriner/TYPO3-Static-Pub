@@ -7,7 +7,7 @@ if (TYPO3_MODE=='BE')	{
 	t3lib_extMgm::insertModuleFunction(
 		'web_info',
 		'tx_staticpub_modfunc1',
-		t3lib_extMgm::extPath($_EXTKEY).'modfunc1/class.tx_staticpub_modfunc1.php',
+		NULL,
 		'LLL:EXT:staticpub/locallang_db.php:moduleFunction.tx_staticpub_modfunc1'
 	);
 }

@@ -15,7 +15,7 @@ $EM_CONF[$_EXTKEY] = array(
 	'description' => 'Allows pages to be staticly published as real HTML pages.',
 	'category' => 'module',
 	'shy' => 0,
-	'version' => '1.3.0',
+	'version' => '1.3.1',
 	'dependencies' => '',
 	'conflicts' => '',
 	'priority' => '',
@@ -34,7 +34,7 @@ $EM_CONF[$_EXTKEY] = array(
 	'CGLcompliance_note' => '',
 	'constraints' => array(
 		'depends' => array(
-	       'typo3' => '6.0.0',
+	       'typo3' => '6.2.0',
 		),
 		'conflicts' => array(
 		),
