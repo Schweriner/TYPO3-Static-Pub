@@ -1,0 +1,38 @@
+{
+    "name": "aoe/staticpub",
+    "description": "Allows pages to be staticly published as real HTML pages",
+    "type": "typo3-cms-extension",
+    "homepage": "https://forge.typo3.org/projects/extension-staticpub",
+    "license": "GPL-3.0",
+    "support": {
+        "email": "dev@aoe.com",
+        "issues": "https://forge.typo3.org/projects/extension-staticpub/issues",
+        "source": "https://forge.typo3.org/projects/extension-staticpub"
+    },
+    "authors": [
+        {
+            "name": "AOE GmbH",
+            "email": "dev@aoe.com",
+            "homepage": "http://www.aoe.com"
+        }
+    ],
+    "require": {
+        "typo3/cms-core": "*"
+    },
+    "require-dev": {
+        "typo3/cms": "6.2.*",
+        "phpunit/phpunit": "4.8.*",
+        "phpunit/phpcov": "2.0.*",
+        "squizlabs/php_codesniffer": "2.3.*",
+        "sebastian/phpcpd": "2.0.*",
+        "phpmd/phpmd": "2.2.*"
+    },
+    "replace": {
+        "staticpub": "*"
+    },
+    "keywords": [
+        "TYPO3",
+        "extbase",
+        "staticpub"
+    ]
+}
