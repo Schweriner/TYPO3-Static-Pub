@@ -21,6 +21,8 @@
 *
 *  This copyright notice MUST APPEAR in all copies of the script!
 ***************************************************************/
+use TYPO3\CMS\Core\Utility\GeneralUtility;
+
 /**
  * Static publishing, frontend hook
  *
@@ -64,7 +66,7 @@ class tx_staticpub_fe extends tx_staticpub {
 	function fe_headerNoCache(&$params, $ref)	{
 
 			// Requirements are that the crawler is loaded, a crawler session is running and re-caching requested as processing instruction:
-		if (t3lib_extMgm::isLoaded('crawler')
+		if (\TYPO3\CMS\Core\Utility\ExtensionManagementUtility::isLoaded('crawler')
 				&& $params['pObj']->applicationData['tx_crawler']['running']
 				&& in_array('tx_staticpub_publish', $params['pObj']->applicationData['tx_crawler']['parameters']['procInstructions']))	{
 
@@ -77,28 +79,28 @@ class tx_staticpub_fe extends tx_staticpub {
 	 * Publishes the current page as static HTML file if possible (depends on configuration and other circumstances)
 	 * (Hook-function called from TSFE, see ext_localconf.php for configuration)
 	 *
-	 * @param	tslib_fe	$pObj Reference to parent object (TSFE)
+	 * @param	\TYPO3\CMS\Frontend\Controller\TypoScriptFrontendController	$pObj Reference to parent object (TSFE)
 	 * @param	integer		$timeOutTime [Not used here]
 	 * @return	void
 	 */
-	function insertPageIncache(tslib_fe $pObj, $timeOutTime)	{
+	function insertPageIncache(\TYPO3\CMS\Frontend\Controller\TypoScriptFrontendController $pObj, $timeOutTime)	{
 
 		$GLOBALS['TT']->push('tx_staticpub','');
 
 
 			// Look for "crawler" extension activity:
 			// Requirements are that the crawler is loaded, a crawler session is running and tx_staticpub_publish requested as processing instruction:
-		if (t3lib_extMgm::isLoaded('crawler')
+		if (\TYPO3\CMS\Core\Utility\ExtensionManagementUtility::isLoaded('crawler')
 				&& $pObj->applicationData['tx_crawler']['running']
 				&& in_array('tx_staticpub_publish', $pObj->applicationData['tx_crawler']['parameters']['procInstructions']))	{
 
 			$fileCreated = false;
 
 			$pubDir = $this->getPublishDir();
-			$origId = intval(t3lib_div::_GET('id'));
+			$origId = intval(GeneralUtility::_GET('id'));
 			$siteScript = $this->createUrl($pObj);
 			$uParts = parse_url($siteScript);
-			$fI = t3lib_div::split_fileref($uParts['path']);
+			$fI = GeneralUtility::split_fileref($uParts['path']);
 
 				// If the page can be staticly published (same evaluation as if cache-control headers would be sent to a reverse-proxy)
 			if ($pObj->isStaticCacheble())	{
@@ -112,9 +114,10 @@ class tx_staticpub_fe extends tx_staticpub {
 						if (!$this->hasInvalidQueryparts($uParts['query']))	{
 
 								// check if the file extension is empty, "html" or "htm" or "txt" (for robots.txt)
-							if (!strcmp($fI['fileext'],'') || t3lib_div::inList('html,htm,txt',$fI['fileext']))	{
+							if (!strcmp($fI['fileext'],'') || GeneralUtility::inList('html,htm,txt',$fI['fileext']))	{
 
 									// create file
+
 								$tsConfig = $pObj->applicationData['tx_crawler']['parameters']['procInstrParams']['tx_staticpub_publish.'];
 								$res = $this->createStaticFile($fI['path'], $fI['file'], $pObj->content, $pubDir, $origId, $tsConfig);
 
@@ -143,14 +146,14 @@ class tx_staticpub_fe extends tx_staticpub {
 
 				// if no file was created check if an existing file from a previous run should be deleted
 			if (!$fileCreated) {
-				$pageTSconfig = t3lib_BEfunc::getPagesTSconfig($origId);
+				$pageTSconfig = \TYPO3\CMS\Backend\Utility\BackendUtility::getPagesTSconfig($origId);
 				if (!empty($pageTSconfig['tx_staticpub.']['deleteOldFiles'])) {
 					$fileName = $fI['path'] . $fI['file'];
 					$res = $this->removeFile($fileName);
 				}
 			}
 
-		} elseif(!t3lib_extMgm::isLoaded('crawler')) {
+		} elseif(!\TYPO3\CMS\Core\Utility\ExtensionManagementUtility::isLoaded('crawler')) {
 			$pObj->applicationData['tx_crawler']['log']['tx_staticpub'] = 'EXT:static_pub; ERROR: crawler is not loaded';
 		} elseif(!$pObj->applicationData['tx_crawler']['running']) {
 			$pObj->applicationData['tx_crawler']['log']['tx_staticpub'] = 'EXT:static_pub; ERROR: crawler is not running';
@@ -161,18 +164,18 @@ class tx_staticpub_fe extends tx_staticpub {
 	/**
 	 * Create url for this page
 	 *
-	 * @param tslib_fe $pObj
+	 * @param \TYPO3\CMS\Frontend\Controller\TypoScriptFrontendController $pObj
 	 * @return string url
 	 */
-	function createUrl(tslib_fe $pObj) {
-		$getVars = t3lib_div::_GET();
+	function createUrl(\TYPO3\CMS\Frontend\Controller\TypoScriptFrontendController $pObj) {
+		$getVars = GeneralUtility::_GET();
 		$origId = intval($getVars['id']);
 		$origType = intval($getVars['type']);
 		unset($getVars['id']);
 		unset($getVars['type']);
 
 			// Create URL with link-function (should be the same as a script in the frontend would make to link to this script):
-		$urlData = $pObj->tmpl->linkData($pObj->sys_page->getPage($origId),'',FALSE,'','',t3lib_div::implodeArrayForUrl('',$getVars),$origType);
+		$urlData = $pObj->tmpl->linkData($pObj->sys_page->getPage($origId),'',FALSE,'','',GeneralUtility::implodeArrayForUrl('',$getVars),$origType);
 		$siteScript = $urlData['totalURL'];
 
 		return $siteScript;

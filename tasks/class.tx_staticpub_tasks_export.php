@@ -27,7 +27,7 @@
  * @package TYPO3
  * @subpackage tx_staticpub
  */
-class tx_staticpub_tasks_export extends tx_scheduler_Task {
+class tx_staticpub_tasks_export extends \TYPO3\CMS\Scheduler\Task\AbstractTask {
 	/**
 	 * @var string
 	 */
@@ -38,11 +38,11 @@ class tx_staticpub_tasks_export extends tx_scheduler_Task {
 	public function execute() {
 		/* @var $export tx_staticpub_export */
 		try{
-			$export = t3lib_div::makeInstance('tx_staticpub_export');
+			$export = \TYPO3\CMS\Core\Utility\GeneralUtility::makeInstance('tx_staticpub_export');
 			$export->exportContent($this->folders);
 			return true;
 		}catch (Exception $e){
-			t3lib_div::devLog('staticpub export error: '.$e->getMessage(), 'staticpub',2);
+			\TYPO3\CMS\Core\Utility\GeneralUtility::devLog('staticpub export error: '.$e->getMessage(), 'staticpub',2);
 			throw $e;
 		}
 	}

@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes" ?>
+<T3locallang>
+    <meta type="array">
+        <type>database</type>
+        <description>Language labels for database tables/fields belonging to extension 'staticpub'</description>
+    </meta>
+    <data type="array">
+        <languageKey index="default" type="array">
+            <label index="moduleFunction.tx_staticpub_modfunc1">Static Publishing</label>
+            <label index="staticpub_tasks_export.folders">
+                <![CDATA[
+                    Folders to export, seperated with Semicolon.<br />Seperate the target with double points. <br /><b>Example</b>:<br />typo3Temp/staticpub:../static/pages;<br/>typo3temp/staticRecources:../static/cdn
+                ]]>
+            </label>
+            <label index="staticpub_tasks_export.name">staticpubExport</label>
+            <label index="staticpub_tasks_export.description">Export the content of static pub</label>
+        </languageKey>
+    </data>
+</T3locallang>

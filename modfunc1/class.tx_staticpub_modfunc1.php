@@ -21,26 +21,15 @@
 *
 *  This copyright notice MUST APPEAR in all copies of the script!
 ***************************************************************/
+use TYPO3\CMS\Backend\Utility\BackendUtility;
+use TYPO3\CMS\Core\Utility\GeneralUtility;
+
 /**
  * Static publishing extension
  *
  * $Id: class.tx_cms_webinfo_lang.php,v 1.3 2004/08/26 12:18:49 typo3 Exp $
  *
  * @author	Kasper Skaarhoj <kasperYYYY@typo3.com>
- */
-/**
- * [CLASS/FUNCTION INDEX of SCRIPT]
- *
- *
- *
- *   58: class tx_staticpub_modfunc1 extends t3lib_extobjbase
- *   65:     function modMenu()
- *   83:     function main()
- *  134:     function renderModule($tree)
- *
- * TOTAL FUNCTIONS: 3
- * (This index is automatically created/updated by the extension "extdeveval")
- *
  */
 
 
@@ -51,7 +40,7 @@
  * @subpackage tx_staticpub
  * @author	Kasper Skaarhoj <kasperYYYY@typo3.com>
  */
-class tx_staticpub_modfunc1 extends t3lib_extobjbase {
+class tx_staticpub_modfunc1 extends \TYPO3\CMS\Backend\Module\AbstractFunctionModule {
 
 	/**
 	 * @var tx_staticpub
@@ -86,39 +75,42 @@ class tx_staticpub_modfunc1 extends t3lib_extobjbase {
 
 		$theOutput = '';
 
-			// Depth selector:
-		$h_func = t3lib_BEfunc::getFuncMenu($this->pObj->id,'SET[depth]',$this->pObj->MOD_SETTINGS['depth'],$this->pObj->MOD_MENU['depth'],'index.php');
+		// Depth selector:
+
+		$h_func = BackendUtility::getFuncMenu($this->pObj->id,'SET[depth]',$this->pObj->MOD_SETTINGS['depth'],$this->pObj->MOD_MENU['depth'],'index.php');
 		$theOutput.= $h_func;
 
-			// Showing the tree:
-			// Initialize starting point of page tree:
+		// Showing the tree:
+		// Initialize starting point of page tree:
 		$treeStartingPoint = intval($this->pObj->id);
-		$treeStartingRecord = t3lib_BEfunc::getRecord('pages', $treeStartingPoint);
+		$treeStartingRecord = BackendUtility::getRecord('pages', $treeStartingPoint);
 		$depth = $this->pObj->MOD_SETTINGS['depth'];
 
-			// Initialize tree object:
-		$tree = t3lib_div::makeInstance('t3lib_pageTree');
+		// Initialize tree object:
+		$tree = GeneralUtility::makeInstance('TYPO3\CMS\Backend\Tree\View\PageTreeView');
 		$tree->init('AND '.$GLOBALS['BE_USER']->getPagePermsClause(1));
 
-			// Creating top icon; the current page
-		$HTML = t3lib_iconWorks::getIconImage('pages', $treeStartingRecord, $GLOBALS['BACK_PATH'],'align="top"');
+		// Creating top icon; the current page
+		// TODO: Deprecated since 7.0
+		// $HTML = t3lib_iconWorks::getIconImage('pages', $treeStartingRecord, $GLOBALS['BACK_PATH'],'align="top"');
+
 		$tree->tree[] = array(
 			'row' => $treeStartingRecord,
 			'HTML' => $HTML
 		);
 
-			// Create the tree from starting point:
+		// Create the tree from starting point:
 		if ($depth>0)	{
 			$tree->getTree($treeStartingPoint, $depth, '');
 		}
 
-			// Add CSS needed:
+		// Add CSS needed:
 		$css_content = '
 		';
 		$marker = '/*###POSTCSSMARKER###*/';
 		$this->pObj->content = str_replace($marker,$css_content.chr(10).$marker,$this->pObj->content);
 
-			// Render information table:
+		// Render information table:
 		$theOutput.= $this->renderModule($tree);
 
 		return $theOutput;
@@ -132,30 +124,30 @@ class tx_staticpub_modfunc1 extends t3lib_extobjbase {
 	 */
 	function renderModule($tree)	{
 
-			// Init static publishing object:
-		$this->pubObj = t3lib_div::makeInstance('tx_staticpub');
+		// Init static publishing object:
+		$this->pubObj = GeneralUtility::makeInstance('tx_staticpub');
 		$pubDir = substr($this->pubObj->getPublishDir(),strlen(PATH_site));
 
-			// Commands executed?
-		if (t3lib_div::_GP('delete_file'))	{
-			$this->pubObj->remove_fileId(t3lib_div::_GP('delete_file'));
+		// Commands executed?
+		if (GeneralUtility::_GP('delete_file'))	{
+			$this->pubObj->remove_fileId(GeneralUtility::_GP('delete_file'));
 		}
-		if (t3lib_div::_GP('delete_page'))	{
-			$this->pubObj->remove_filesFromPageId(t3lib_div::_GP('delete_page'));
+		if (GeneralUtility::_GP('delete_page'))	{
+			$this->pubObj->remove_filesFromPageId(GeneralUtility::_GP('delete_page'));
 		}
-		$flushAll = t3lib_div::_POST('_flush_all');
+		$flushAll = GeneralUtility::_POST('_flush_all');
 
 
-			// Traverse tree:
+		// Traverse tree:
 		$output = '';
 		foreach($tree->tree as $row)	{
 
-				// Flush all files... :-)
+			// Flush all files... :-)
 			if ($flushAll)	{
 				$this->pubObj->remove_filesFromPageId($row['row']['uid']);
 			}
 
-				// Fetch files:
+			// Fetch files:
 			$filerecords = $this->pubObj->getRecordForPageID($row['row']['uid']);
 			$cellAttrib = ($row['row']['_CSSCLASS'] ? ' class="'.$row['row']['_CSSCLASS'].'"' : '');
 
@@ -164,20 +156,20 @@ class tx_staticpub_modfunc1 extends t3lib_extobjbase {
 					$tCells = array();
 
 					if (!$k)	{
-						$tCells[] = '<td nowrap="nowrap" valign="top" rowspan="'.count($filerecords).'"'.$cellAttrib.'>'.$row['HTML'].t3lib_BEfunc::getRecordTitle('pages',$row['row'],TRUE).'</td>';
+						$tCells[] = '<td nowrap="nowrap" valign="top" rowspan="'.count($filerecords).'"'.$cellAttrib.'>'.$row['HTML'].BackendUtility::getRecordTitle('pages',$row['row'],TRUE).'</td>';
 						$tCells[] = '<td nowrap="nowrap" valign="top" rowspan="'.count($filerecords).'"><a href="'.htmlspecialchars('index.php?id='.$this->pObj->id.'&delete_page='.$row['row']['uid']).'">'.
-									'<img'.t3lib_iconWorks::skinImg($this->pObj->doc->backPath,'gfx/garbage.gif','width="11" height="12"').' alt="" />'.
-									'</a></td>';
+							'<img'.t3lib_iconWorks::skinImg($this->pObj->doc->backPath,'gfx/garbage.gif','width="11" height="12"').' alt="" />'.
+							'</a></td>';
 					}
 
 					$tCells[] = '<td nowrap="nowrap"><span class="typo3-dimmed">'.$pubDir.'</span> '.$frec['filepath'].'</td>';
 					$tCells[] = '<td>'.(@is_file(PATH_site.$pubDir.$frec['filepath'])?'OK':'Not found!').'</td>';
-					$tCells[] = '<td nowrap="nowrap">'.t3lib_BEfunc::dateTimeAge($frec['tstamp']).'</td>';
+					$tCells[] = '<td nowrap="nowrap">'.BackendUtility::dateTimeAge($frec['tstamp']).'</td>';
 					$tCells[] = '<td><a href="'.htmlspecialchars('index.php?id='.$this->pObj->id.'&delete_file='.$frec['filepath_hash']).'">'.
-								'<img'.t3lib_iconWorks::skinImg($this->pObj->doc->backPath,'gfx/garbage.gif','width="11" height="12"').' alt="" />'.
-								'</a></td>';
+						'<img'.t3lib_iconWorks::skinImg($this->pObj->doc->backPath,'gfx/garbage.gif','width="11" height="12"').' alt="" />'.
+						'</a></td>';
 
-						// Compile Row:
+					// Compile Row:
 					$output.= '
 						<tr class="bgColor4">
 							'.implode('
@@ -185,16 +177,16 @@ class tx_staticpub_modfunc1 extends t3lib_extobjbase {
 						</tr>';
 				}
 			} else {
-					// Compile Row:
+				// Compile Row:
 				$output.= '
 					<tr class="bgColor4">
-						<td nowrap="nowrap" colspan="2"'.$cellAttrib.'>'.$row['HTML'].t3lib_BEfunc::getRecordTitle('pages',$row['row'],TRUE).'</td>
+						<td nowrap="nowrap" colspan="2"'.$cellAttrib.'>'.$row['HTML'].BackendUtility::getRecordTitle('pages',$row['row'],TRUE).'</td>
 						<td colspan="4"><em>No entries</em></td>
 					</tr>';
 			}
 		}
 
-			// Create header:
+		// Create header:
 		$tCells = array();
 		$tCells[]='<td>Title:</td>';
 		$tCells[]='<td>&nbsp;</td>';
@@ -208,7 +200,7 @@ class tx_staticpub_modfunc1 extends t3lib_extobjbase {
 				',$tCells).'
 			</tr>'.$output;
 
-			// Compile final table and return:
+		// Compile final table and return:
 		$output = '
 
 		<input type="hidden" name="id" value="'.$this->pObj->id.'" />

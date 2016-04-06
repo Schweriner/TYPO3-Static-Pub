@@ -25,4 +25,6 @@ if (TYPO3_MODE=='BE') {
 		'additionalFields' => 'tx_staticpub_tasks_export_AdditionalFieldProvider'
 	);
 }
+
+
 ?>
