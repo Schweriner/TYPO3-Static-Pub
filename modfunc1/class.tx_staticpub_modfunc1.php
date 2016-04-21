@@ -151,14 +151,19 @@ class tx_staticpub_modfunc1 extends \TYPO3\CMS\Backend\Module\AbstractFunctionMo
 			$filerecords = $this->pubObj->getRecordForPageID($row['row']['uid']);
 			$cellAttrib = ($row['row']['_CSSCLASS'] ? ' class="'.$row['row']['_CSSCLASS'].'"' : '');
 
+			/** @var \TYPO3\CMS\Core\Imaging\IconFactory $iconFactory */
+			$iconFactory = GeneralUtility::makeInstance('TYPO3\CMS\Core\Imaging\IconFactory');
+
 			if (count($filerecords))	{
 				foreach($filerecords as $k => $frec)	{
 					$tCells = array();
 
+					// TODO: Earlier here were Icons created by <img'.t3lib_iconWorks::skinImg($this->pObj->doc->backPath,'gfx/garbage.gif','width="11" height="12"').' alt="" /> which does not work in 7.6 anymore
+
 					if (!$k)	{
 						$tCells[] = '<td nowrap="nowrap" valign="top" rowspan="'.count($filerecords).'"'.$cellAttrib.'>'.$row['HTML'].BackendUtility::getRecordTitle('pages',$row['row'],TRUE).'</td>';
 						$tCells[] = '<td nowrap="nowrap" valign="top" rowspan="'.count($filerecords).'"><a href="'.htmlspecialchars('index.php?id='.$this->pObj->id.'&delete_page='.$row['row']['uid']).'">'.
-							'<img'.t3lib_iconWorks::skinImg($this->pObj->doc->backPath,'gfx/garbage.gif','width="11" height="12"').' alt="" />'.
+							''.
 							'</a></td>';
 					}
 
@@ -166,7 +171,7 @@ class tx_staticpub_modfunc1 extends \TYPO3\CMS\Backend\Module\AbstractFunctionMo
 					$tCells[] = '<td>'.(@is_file(PATH_site.$pubDir.$frec['filepath'])?'OK':'Not found!').'</td>';
 					$tCells[] = '<td nowrap="nowrap">'.BackendUtility::dateTimeAge($frec['tstamp']).'</td>';
 					$tCells[] = '<td><a href="'.htmlspecialchars('index.php?id='.$this->pObj->id.'&delete_file='.$frec['filepath_hash']).'">'.
-						'<img'.t3lib_iconWorks::skinImg($this->pObj->doc->backPath,'gfx/garbage.gif','width="11" height="12"').' alt="" />'.
+						''.
 						'</a></td>';
 
 					// Compile Row:
